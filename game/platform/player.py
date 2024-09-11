@@ -22,7 +22,10 @@ class Player():
         self.image = self.image_src_r
         self.rect = self.image.get_rect()
         self.game_reset()
+        self.image_bullet = None
         
+        self.msg_level_text = None
+        self.msg_score_text = None
         self.mfont30 = pygame.font.SysFont('malgungothic', 30)
         self.mfont40 = pygame.font.SysFont('malgungothic', 40)
         self.mfont50 = pygame.font.SysFont('malgungothic', 50)
@@ -43,7 +46,11 @@ class Player():
         self.rect.bottom = self.screen.get_height() - 60        
         self.rect_pre = self.rect.copy()
         self.gameover = False
-        self.parent.game_reset()
+        self.parent.map_change()
+    
+    def set_bullet_img(self,filename):        
+        img = pygame.image.load(f'{filename}').convert_alpha()
+        self.image_bullet = pygame.transform.scale(img,(40,30))
         
     def set_snd_coin(self,filename):
         self.snd_dic['coin'] = pygame.mixer.Sound(filename)
@@ -73,31 +80,35 @@ class Player():
                     dy = self.jump_y
         return dy
     
-    def jump(self, bullet = None):
+    def jump(self):
         if self.jumped == False:
             if self.snd_dic['jump'] is not None:
                 self.snd_dic['jump'].play()
             self.jump_y = self.JUMP * (-1)
             self.jumped = True
-            if bullet is not None:
-                self.parent.add_bullet(bullet)
+            if self.image_bullet is not None:
+                self.parent.add_bullet(self.image_bullet)
         
     def key_pressed(self):
         if self.speed == 0:
             return
         key_press = pygame.key.get_pressed()
         
-        if key_press[pygame.K_UP]:
-            self.rect.centery -= self.speed
+        if len(self.parent.group_block)==0:
+            if key_press[pygame.K_UP]:
+                self.rect.centery -= self.speed
 
-        if key_press[pygame.K_DOWN]:
-            self.rect.centery += self.speed
-            
+            if key_press[pygame.K_DOWN]:
+                self.rect.centery += self.speed
+                
         if key_press[pygame.K_LEFT]:
             self.rect.centerx -= self.speed
             
         if key_press[pygame.K_RIGHT]:
             self.rect.centerx += self.speed
+            
+        if key_press[pygame.K_SPACE]:
+            self.jump()
             
     def rotate(self, angle):
         self.image = pygame.transform.rotate(self.image_src,angle)
@@ -133,19 +144,29 @@ class Player():
         yc2 = pygame.Rect(rect.x, rect.y + dy/2, rect.width, rect.height)#위로
 
         for block in self.parent.group_block:
+            
+            if block.move_y != 0:
+                xc.height -= abs(block.direction)+4
+            if block.move_x != 0:
+                yc.width -= abs(block.direction)+4
+                yc2.width -= abs(block.direction)+4
+                
             if block.rect.colliderect(xc):
-                dx = 0        
+                dx = 0     
             if block.rect.colliderect(yc):
                 col_thresh = block.rect.height/2
                 if abs((rect.top + dy) - block.rect.bottom) < col_thresh:#블럭 아래?
-                    self.jump_y = 0 #점프 중이면 초기화
+                    self.jump_y = 0 
                     dy = block.rect.bottom - rect.top #점프중에면 블럭 아래까지만 점프
                 elif abs((rect.bottom + dy) - block.rect.top) < col_thresh:#블럭 위에?
                     rect.bottom = block.rect.top - 1 #블럭위에 올려 놓는다.
                     self.jumped = False #공중에 있으면 초기화
                     dy = 0
-                if block.move_x != 0:#옆으로 이동하는 블럭이면 블럭이 이동하는 만큼 이동
-                    rect.x += block.direction
+                    # if block.move_y != 0:
+                    #     dy += block.direction
+                    
+                    if block.move_x != 0:
+                        dx += block.direction
 
             if block.rect.colliderect(yc2):
                 col_thresh = block.rect.height/2
@@ -156,6 +177,8 @@ class Player():
                     rect.bottom = block.rect.top - 1 #블럭위에 올려 놓는다.
                     self.jumped = False #공중에 있으면 초기화
                     dy = 0
+                    if block.move_y != 0:
+                        dy += block.direction
 
         self.rect.x += dx
         self.rect.y += dy        
@@ -178,12 +201,44 @@ class Player():
                 self.snd_dic['game_over'].play()
                 self.game_reset()
             
+        if pygame.sprite.spritecollide(self, self.parent.group_exitDoor, False):
+            self.level += 1
+            
+            self.rect.left = 60
+            self.rect.bottom = self.screen.get_height() - 60        
+            self.rect_pre = self.rect.copy()
+            self.parent.map_change()
+                
     def draw_message(self, msg:str, color:tuple, x:int, y:int):
         msg = f'{msg}'
         img = self.mfont30.render(msg, True, color)
         self.screen.blit(img, (x, y))
+    
+    def set_msg_score(self, x=10,y=10, color = (0,0,0), text = '점수 : '):
+        self.msg_score_x = x
+        self.msg_score_y = y
+        self.msg_score_color = color
+        self.msg_score_text = text
+        
+    def set_msg_level(self, x=10,y=50, color = (0,0,0), text = '레벨 : '):
+        self.msg_level_x = x
+        self.msg_level_y = y
+        self.msg_level_color = color
+        self.msg_level_text = text
         
     def draw(self):
+        if self.msg_score_text is not None:
+            self.draw_message(f'{self.msg_score_text}{self.score}',
+                            self.msg_score_color, 
+                            x=self.msg_score_x,
+                            y=self.msg_score_y)
+        
+        if self.msg_level_text is not None:
+            self.draw_message(f'{self.msg_level_text}{self.level}',
+                            self.msg_level_color, 
+                            x=self.msg_level_x,
+                            y=self.msg_level_y)
+        
         self.key_pressed()        
         self.check_img_dir()
         self.rect.y += self.jump_process()
