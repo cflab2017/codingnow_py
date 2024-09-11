@@ -1,6 +1,5 @@
 import pygame
 import pygame.sprite
-import traceback
 
 from codingnow.game.platform.player import *
 from codingnow.game.platform.block import *
@@ -10,7 +9,7 @@ from codingnow.game.platform.lava import *
 from codingnow.game.platform.bullet import *
 from codingnow.game.platform.exitdoor import *
 
-class Platform():
+class PlatformGame():
     player:Player = None
     def __init__(self,screen:Surface) -> None:
         self.screen = screen
@@ -24,7 +23,7 @@ class Platform():
         self.map_data = {}
     
 
-    def map_change(self):
+    def map_change(self, level):
         self.group_bullet.empty()
         self.group_coin.empty()
         self.group_monster.empty()
@@ -32,14 +31,14 @@ class Platform():
         self.group_lava.empty()
         self.group_exitDoor.empty()
         try:            
-            if self.player.level not in self.map_data:
-                self.player.level = 1
+            if level not in self.map_data:
+                level = 1
                 
-            if self.player.level not in self.map_data:
-                return
+            if level not in self.map_data:
+                return None
             
-            for key in self.map_data[self.player.level]:
-                item = self.map_data[self.player.level][key]
+            for key in self.map_data[level]:
+                item = self.map_data[level][key]
                 
                 for values in item:
                     filename = values[0]
@@ -59,9 +58,11 @@ class Platform():
                         self.group_lava.add(Lava(self.screen,filename,x,y))
         except Exception as ex:
             print(ex)
+            
+        return level
                         
-    def add_player(self,filename:str, width:int, height:int):
-        self.player = Player(self,self.screen,filename,width,height)
+    def add_player(self,filename:str, flip:bool=False, width:int=60, height:int=60):
+        self.player = Player(self,self.screen,filename,width,height,flip)
         return self.player
     
     def add_bg_image(self,filename:str):        

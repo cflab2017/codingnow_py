@@ -13,15 +13,19 @@ class Player():
     level = 0
     gameover = False
     direction = 2
-    def __init__(self,parent,screen:Surface,filename:str, width:int, height:int) -> None:
+    def __init__(self,parent,screen:Surface,filename:str, width:int, height:int,flip: bool) -> None:
         self.parent = parent
         self.screen = screen        
         img = pygame.image.load(f'{filename}').convert_alpha()
-        self.image_src_r = pygame.transform.scale(img,(width,height))
-        self.image_src_l = pygame.transform.flip(self.image_src_r,True,False)
+        if flip:
+            self.image_src_l = pygame.transform.scale(img,(width,height))
+            self.image_src_r = pygame.transform.flip(self.image_src_l,True,False)
+        else:
+            self.image_src_r = pygame.transform.scale(img,(width,height))
+            self.image_src_l = pygame.transform.flip(self.image_src_r,True,False)
         self.image = self.image_src_r
         self.rect = self.image.get_rect()
-        self.game_reset()
+        self.game_reset(True)
         self.image_bullet = None
         
         self.msg_level_text = None
@@ -39,14 +43,15 @@ class Player():
             'game_over':None,
         }
         
-    def game_reset(self):
+    def game_reset(self, reload_map):
         self.score = 0
         self.level = 1
         self.rect.left = 60
         self.rect.bottom = self.screen.get_height() - 60        
         self.rect_pre = self.rect.copy()
         self.gameover = False
-        self.parent.map_change()
+        if reload_map:
+            self.parent.map_change(self.level)
     
     def set_bullet_img(self,filename):        
         img = pygame.image.load(f'{filename}').convert_alpha()
@@ -94,12 +99,12 @@ class Player():
             return
         key_press = pygame.key.get_pressed()
         
-        if len(self.parent.group_block)==0:
-            if key_press[pygame.K_UP]:
-                self.rect.centery -= self.speed
+        # if len(self.parent.group_block)==0:
+        #     if key_press[pygame.K_UP]:
+        #         self.rect.centery -= self.speed
 
-            if key_press[pygame.K_DOWN]:
-                self.rect.centery += self.speed
+        #     if key_press[pygame.K_DOWN]:
+        #         self.rect.centery += self.speed
                 
         if key_press[pygame.K_LEFT]:
             self.rect.centerx -= self.speed
@@ -193,13 +198,13 @@ class Player():
         if pygame.sprite.spritecollide(self, self.parent.group_monster, False):
             if self.snd_dic['game_over'] is not None:
                 self.snd_dic['game_over'].play()
-                self.game_reset()
+                self.game_reset(True)
 
         # 용암 충돌확인? 
         if pygame.sprite.spritecollide(self, self.parent.group_lava, False):
             if self.snd_dic['game_over'] is not None:
                 self.snd_dic['game_over'].play()
-                self.game_reset()
+                self.game_reset(True)
             
         if pygame.sprite.spritecollide(self, self.parent.group_exitDoor, False):
             self.level += 1
@@ -207,7 +212,7 @@ class Player():
             self.rect.left = 60
             self.rect.bottom = self.screen.get_height() - 60        
             self.rect_pre = self.rect.copy()
-            self.parent.map_change()
+            self.level = self.parent.map_change(self.level)
                 
     def draw_message(self, msg:str, color:tuple, x:int, y:int):
         msg = f'{msg}'
