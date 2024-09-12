@@ -15,7 +15,8 @@ class Player():
     direction = 2
     def __init__(self,parent,screen:Surface,filename:str, width:int, height:int,flip: bool) -> None:
         self.parent = parent
-        self.screen = screen        
+        self.screen = screen      
+        self.img_gameover = None  
         img = pygame.image.load(f'{filename}').convert_alpha()
         if flip:
             self.image_src_l = pygame.transform.scale(img,(width,height))
@@ -34,7 +35,8 @@ class Player():
         self.mfont40 = pygame.font.SysFont('malgungothic', 40)
         self.mfont50 = pygame.font.SysFont('malgungothic', 50)
         self.mfont60 = pygame.font.SysFont('malgungothic', 60)
-
+        
+        # self.set_gameover_image('ghost.png')
         #효과음
         self.snd_dic = {
             'coin':None,
@@ -42,6 +44,10 @@ class Player():
             'monster':None,
             'game_over':None,
         }
+        
+    def set_gameover_image(self,filename):
+        img = pygame.image.load(f'{filename}').convert_alpha()
+        self.img_gameover = pygame.transform.scale(img,(self.rect.width,self.rect.height))
         
     def game_reset(self, reload_map):
         self.score = 0
@@ -188,7 +194,24 @@ class Player():
         self.rect.x += dx
         self.rect.y += dy        
         self.rect_pre = self.rect.copy()
-           
+        
+    def game_over_process(self):
+        if self.gameover:
+            if self.img_gameover is not None and self.rect.bottom > 0:
+                offset = self.rect.y
+                offset /= 50
+                offset = int(offset)
+                if offset < 2:
+                    offset = 2
+                print(offset)
+                self.rect.y -= offset
+                self.screen.blit(self.img_gameover,self.rect)
+            else:
+                self.game_reset(True)
+            return False
+        else:
+            return True
+        
     def check_collide_all(self):  
         if pygame.sprite.spritecollide(self, self.parent.group_coin, True):
             self.score += 10
@@ -198,13 +221,15 @@ class Player():
         if pygame.sprite.spritecollide(self, self.parent.group_monster, False):
             if self.snd_dic['game_over'] is not None:
                 self.snd_dic['game_over'].play()
-                self.game_reset(True)
+                # self.game_reset(True)
+                self.gameover = True
 
         # 용암 충돌확인? 
         if pygame.sprite.spritecollide(self, self.parent.group_lava, False):
             if self.snd_dic['game_over'] is not None:
                 self.snd_dic['game_over'].play()
-                self.game_reset(True)
+                # self.game_reset(True)
+                self.gameover = True
             
         if pygame.sprite.spritecollide(self, self.parent.group_exitDoor, False):
             self.level += 1
@@ -243,14 +268,15 @@ class Player():
                             self.msg_level_color, 
                             x=self.msg_level_x,
                             y=self.msg_level_y)
+            
+        if self.game_over_process():
+            self.key_pressed()        
+            self.check_img_dir()
+            self.rect.y += self.jump_process()
+            self.check_img_screen_limit()        
+            self.check_colliderect_blocks()        
+            self.check_collide_all()
         
-        self.key_pressed()        
-        self.check_img_dir()
-        self.rect.y += self.jump_process()
-        self.check_img_screen_limit()        
-        self.check_colliderect_blocks()        
-        self.check_collide_all()
-        
-        self.screen.blit(self.image, self.rect)
+            self.screen.blit(self.image, self.rect)
         
         

@@ -1,4 +1,7 @@
 import pygame
+import pygame.draw
+import pygame.mouse
+import pygame.rect
 import pygame.sprite
 
 from codingnow.game.platform.player import *
@@ -11,6 +14,7 @@ from codingnow.game.platform.exitdoor import *
 
 class PlatformGame():
     player:Player = None
+    on_mouse_point = False
     def __init__(self,screen:Surface) -> None:
         self.screen = screen
         self.group_block = pygame.sprite.Group()
@@ -21,7 +25,7 @@ class PlatformGame():
         self.group_bullet = pygame.sprite.Group()
         self.image_bg = None
         self.map_data = {}
-    
+        self.mfont30 = pygame.font.SysFont('malgungothic', 30)    
 
     def map_change(self, level):
         self.group_bullet.empty()
@@ -99,7 +103,38 @@ class PlatformGame():
 
     def add_bullet(self,images):
         self.group_bullet.add(Bullet(self.screen,images,self.player))
-    
+        
+    def draw_mouse_point(self):        
+        if pygame.mouse.get_focused():
+            pygame.mouse.set_visible(False)
+            x,y = pygame.mouse.get_pos()
+            msg = f'X:{x},Y:{y}'
+            img = self.mfont30.render(msg, True, (255,255,255))
+            rect = img.get_rect()
+            # rect.centerx = x
+            # rect.bottom = y
+            rect.right = self.screen.get_width()
+            rect.y = 0
+            pygame.draw.line(self.screen,(192,192,192),(x,0),(x,self.screen.get_height()),1)
+            pygame.draw.line(self.screen,(192,192,192),(0,y),(self.screen.get_width(),y),1)
+            
+            if rect.x < 0:
+                rect.x = 0
+            if rect.right > self.screen.get_width():
+                rect.right = self.screen.get_width()
+                
+            if rect.y < 0:
+                rect.y = 0
+            if rect.bottom > self.screen.get_height():
+                rect.bottom = self.screen.get_height()
+                
+            # self.screen.blit(img, rect)
+            temp_surface = pygame.Surface((rect.width, rect.height))
+            temp_surface.fill((0,0,0))
+            temp_surface.set_alpha(100)
+            temp_surface.blit(img,(0,0))
+            self.screen.blit(temp_surface, rect)
+        
     def draw(self):
         if self.image_bg is not None:
             self.screen.blit(self.image_bg,(0,0))
@@ -126,3 +161,5 @@ class PlatformGame():
         self.group_monster.draw(self.screen)
         self.group_lava.draw(self.screen)
         self.group_bullet.draw(self.screen)
+        if self.on_mouse_point:
+            self.draw_mouse_point()
