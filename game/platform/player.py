@@ -203,7 +203,6 @@ class Player():
                 offset = int(offset)
                 if offset < 2:
                     offset = 2
-                print(offset)
                 self.rect.y -= offset
                 self.screen.blit(self.img_gameover,self.rect)
             else:
@@ -222,14 +221,14 @@ class Player():
             if self.snd_dic['game_over'] is not None:
                 self.snd_dic['game_over'].play()
                 # self.game_reset(True)
-                self.gameover = True
+            self.gameover = True
 
         # 용암 충돌확인? 
         if pygame.sprite.spritecollide(self, self.parent.group_lava, False):
             if self.snd_dic['game_over'] is not None:
                 self.snd_dic['game_over'].play()
                 # self.game_reset(True)
-                self.gameover = True
+            self.gameover = True
             
         if pygame.sprite.spritecollide(self, self.parent.group_exitDoor, False):
             self.level += 1
