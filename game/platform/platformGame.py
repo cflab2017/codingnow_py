@@ -3,6 +3,7 @@ import pygame.draw
 import pygame.mouse
 import pygame.rect
 import pygame.sprite
+import clipboard
 
 from codingnow.game.platform.player import *
 from codingnow.game.platform.block import *
@@ -108,6 +109,14 @@ class PlatformGame():
         if pygame.mouse.get_focused():
             pygame.mouse.set_visible(False)
             x,y = pygame.mouse.get_pos()
+            x = x - (x%10)
+            y = y - (y%10)            
+            # pygame.mouse.set_pos(x,y)
+            
+            key_press = pygame.key.get_pressed()
+            if key_press[pygame.K_LCTRL] and key_press[pygame.K_c]:
+                clipboard.copy(f"x={x},y={y}")
+            
             msg = f'X:{x},Y:{y}'
             img = self.mfont30.render(msg, True, (255,255,255))
             rect = img.get_rect()
@@ -117,6 +126,11 @@ class PlatformGame():
             rect.y = 0
             pygame.draw.line(self.screen,(192,192,192),(x,0),(x,self.screen.get_height()),1)
             pygame.draw.line(self.screen,(192,192,192),(0,y),(self.screen.get_width(),y),1)
+            
+            temp_surface = Surface((60,30))            
+            pygame.draw.rect(temp_surface,(0,192,192),(0,0,60,30))
+            temp_surface.set_alpha(100)
+            self.screen.blit(temp_surface, (x,y,60,30))
             
             if rect.x < 0:
                 rect.x = 0
