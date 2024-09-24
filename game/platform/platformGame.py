@@ -12,20 +12,27 @@ from codingnow.game.platform.monster import *
 from codingnow.game.platform.lava import *
 from codingnow.game.platform.bullet import *
 from codingnow.game.platform.exitdoor import *
+from codingnow.game.platform.weapon import *
 
 class PlatformGame():
     player:Player = None
     on_mouse_point = False
     def __init__(self,screen:Surface) -> None:
         self.screen = screen
+        self.player = None
         self.group_block = pygame.sprite.Group()
         self.group_coin = pygame.sprite.Group()
         self.group_lava = pygame.sprite.Group()
         self.group_monster = pygame.sprite.Group()
         self.group_exitDoor = pygame.sprite.Group()
+        self.group_weapon = pygame.sprite.Group()
         self.group_bullet = pygame.sprite.Group()
         self.image_bg = None
         self.map_data = {}
+        self.msg_status=[]
+        self.msg_status_curr = ''
+        self.msg_status_tick = 0
+        self.copy_pressed = False
         self.mfont30 = pygame.font.SysFont('malgungothic', 30)    
 
     def map_change(self, level):
@@ -35,6 +42,7 @@ class PlatformGame():
         self.group_block.empty()
         self.group_lava.empty()
         self.group_exitDoor.empty()
+        self.group_weapon.empty()
         try:            
             if level not in self.map_data:
                 level = 1
@@ -61,6 +69,8 @@ class PlatformGame():
                         self.group_exitDoor.add(ExitDoor(self.screen,filename,x,y))
                     if key == 'lava':
                         self.group_lava.add(Lava(self.screen,filename,x,y))
+                    if key == 'weapon':
+                        self.group_weapon.add(Weapon(self.screen,filename,x,y))
         except Exception as ex:
             print(ex)
             
@@ -88,6 +98,13 @@ class PlatformGame():
         self.check_map_init(level,'coin')            
         self.map_data[level]['coin'].append([filename,x,y])        
                 
+    def add_map_weapon(self,level:int, filename:str, x:int, y:int):
+        self.check_map_init(level,'weapon')            
+        self.map_data[level]['weapon'].append([filename,x,y])  
+        # if self.player is not None:
+        #     self.player.set_bullet_img(filename)
+            
+        
     def add_map_mons(self,level:int, filename:str, x:int, y:int):
         self.check_map_init(level,'monster')
         self.map_data[level]['monster'].append([filename,x,y])
@@ -102,8 +119,8 @@ class PlatformGame():
         self.map_data[level]['exit'].append([filename,x,y])
 
 
-    def add_bullet(self,images):
-        self.group_bullet.add(Bullet(self.screen,images,self.player))
+    def add_bullet(self,filename):        
+        self.group_bullet.add(Bullet(self.screen,filename,self.player))
         
     def draw_mouse_point(self):        
         if pygame.mouse.get_focused():
@@ -114,8 +131,13 @@ class PlatformGame():
             # pygame.mouse.set_pos(x,y)
             
             key_press = pygame.key.get_pressed()
-            if key_press[pygame.K_LCTRL] and key_press[pygame.K_c]:
-                clipboard.copy(f"x={x},y={y}")
+            if key_press[pygame.K_LCTRL] and key_press[pygame.K_c] or pygame.mouse.get_pressed()[0]:
+                if self.copy_pressed == False:
+                    clipboard.copy(f"x={x},y={y}")
+                    self.msg_status.append(f'복사 X:{x},Y:{y}')
+                    self.copy_pressed = True
+            else:
+                self.copy_pressed = False
             
             msg = f'X:{x},Y:{y}'
             img = self.mfont30.render(msg, True, (255,255,255))
@@ -148,7 +170,24 @@ class PlatformGame():
             temp_surface.set_alpha(100)
             temp_surface.blit(img,(0,0))
             self.screen.blit(temp_surface, rect)
-        
+            
+    def draw_status_msg(self):
+        if len(self.msg_status) and self.msg_status_tick == 0:
+            self.msg_status_curr = self.msg_status.pop()
+            self.msg_status_tick = pygame.time.get_ticks()+1000
+            
+        if self.msg_status_tick != 0:
+            if self.msg_status_tick < pygame.time.get_ticks():
+                self.msg_status_tick = 0
+                self.msg_status_curr = ''                
+            else:                
+                img = self.mfont30.render(self.msg_status_curr, True, (255,255,255),(0,0,0))
+                img.set_alpha(80)
+                rect = img.get_rect()
+                rect.centerx = self.screen.get_width()/2
+                rect.centery = self.screen.get_height()/2
+                self.screen.blit(img, rect)
+            
     def draw(self):
         if self.image_bg is not None:
             self.screen.blit(self.image_bg,(0,0))
@@ -164,6 +203,7 @@ class PlatformGame():
         
         self.group_block.update()
         self.group_coin.update()
+        self.group_weapon.update()
         self.group_monster.update()
         self.group_lava.update()
         self.group_bullet.update()
@@ -172,8 +212,11 @@ class PlatformGame():
         self.group_exitDoor.draw(self.screen)
         self.group_block.draw(self.screen)
         self.group_coin.draw(self.screen)
+        self.group_weapon.draw(self.screen)
         self.group_monster.draw(self.screen)
         self.group_lava.draw(self.screen)
         self.group_bullet.draw(self.screen)
         if self.on_mouse_point:
             self.draw_mouse_point()
+            
+        self.draw_status_msg()

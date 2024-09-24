@@ -13,9 +13,10 @@ class Player():
     level = 0
     gameover = False
     direction = 2
+    weapons = []
     def __init__(self,parent,screen:Surface,filename:str, width:int, height:int,flip: bool) -> None:
         self.parent = parent
-        self.screen = screen      
+        self.screen = screen
         self.img_gameover = None  
         img = pygame.image.load(f'{filename}').convert_alpha()
         if flip:
@@ -27,10 +28,12 @@ class Player():
         self.image = self.image_src_r
         self.rect = self.image.get_rect()
         self.game_reset(True)
-        self.image_bullet = None
-        
+        self.weapon_pressed = False
+        # self.image_bullet = None        
         self.msg_level_text = None
         self.msg_score_text = None
+        self.msg_weapon_text = None
+        self.mfont20 = pygame.font.SysFont('malgungothic', 20)
         self.mfont30 = pygame.font.SysFont('malgungothic', 30)
         self.mfont40 = pygame.font.SysFont('malgungothic', 40)
         self.mfont50 = pygame.font.SysFont('malgungothic', 50)
@@ -39,6 +42,7 @@ class Player():
         # self.set_gameover_image('ghost.png')
         #효과음
         self.snd_dic = {
+            'weapon':None,
             'coin':None,
             'jump':None,
             'monster':None,
@@ -59,9 +63,12 @@ class Player():
         if reload_map:
             self.parent.map_change(self.level)
     
-    def set_bullet_img(self,filename):        
-        img = pygame.image.load(f'{filename}').convert_alpha()
-        self.image_bullet = pygame.transform.scale(img,(40,30))
+    # def set_bullet_img(self,filename):        
+    #     img = pygame.image.load(f'{filename}').convert_alpha()
+    #     self.image_bullet = pygame.transform.scale(img,(40,30))
+        
+    def set_snd_weapon(self,filename):
+        self.snd_dic['weapon'] = pygame.mixer.Sound(filename)
         
     def set_snd_coin(self,filename):
         self.snd_dic['coin'] = pygame.mixer.Sound(filename)
@@ -97,8 +104,6 @@ class Player():
                 self.snd_dic['jump'].play()
             self.jump_y = self.JUMP * (-1)
             self.jumped = True
-            if self.image_bullet is not None:
-                self.parent.add_bullet(self.image_bullet)
         
     def key_pressed(self):
         if self.speed == 0:
@@ -112,6 +117,16 @@ class Player():
         #     if key_press[pygame.K_DOWN]:
         #         self.rect.centery += self.speed
                 
+        if key_press[pygame.K_RETURN]:
+            if len(self.weapons) > 0 and self.weapon_pressed==False:
+                self.weapon_pressed = True
+                filename = self.weapons.pop()
+                self.parent.add_bullet(filename)
+                if self.snd_dic['weapon'] is not None:
+                    self.snd_dic['weapon'].play()
+        else:
+            self.weapon_pressed = False
+            
         if key_press[pygame.K_LEFT]:
             self.rect.centerx -= self.speed
             
@@ -212,6 +227,17 @@ class Player():
             return True
         
     def check_collide_all(self):  
+        weapons = pygame.sprite.spritecollide(self, self.parent.group_weapon, True)
+        for weapon in weapons:
+            self.weapons.append(weapon.filename)
+            if self.snd_dic['weapon'] is not None:
+                self.snd_dic['weapon'].play()
+            
+        # if pygame.sprite.spritecollide(self, self.parent.group_weapon, True):
+        #     self.weapon += 1
+        #     if self.snd_dic['weapon'] is not None:
+        #         self.snd_dic['weapon'].play()
+                
         if pygame.sprite.spritecollide(self, self.parent.group_coin, True):
             self.score += 10
             if self.snd_dic['coin'] is not None:
@@ -240,7 +266,7 @@ class Player():
                 
     def draw_message(self, msg:str, color:tuple, x:int, y:int):
         msg = f'{msg}'
-        img = self.mfont30.render(msg, True, color)
+        img = self.mfont20.render(msg, True, color)
         self.screen.blit(img, (x, y))
     
     def set_msg_score(self, x=10,y=10, color = (0,0,0), text = '점수 : '):
@@ -255,6 +281,12 @@ class Player():
         self.msg_level_color = color
         self.msg_level_text = text
         
+    def set_msg_weapon(self, x=10,y=90, color = (0,0,0), text = '레벨 : '):
+        self.msg_weapon_x = x
+        self.msg_weapon_y = y
+        self.msg_weapon_color = color
+        self.msg_weapon_text = text
+        
     def draw(self):
         if self.msg_score_text is not None:
             self.draw_message(f'{self.msg_score_text}{self.score}',
@@ -267,6 +299,12 @@ class Player():
                             self.msg_level_color, 
                             x=self.msg_level_x,
                             y=self.msg_level_y)
+            
+        if self.msg_weapon_text is not None:
+            self.draw_message(f'{self.msg_weapon_text}{len(self.weapons)}',
+                            self.msg_weapon_color, 
+                            x=self.msg_weapon_x,
+                            y=self.msg_weapon_y)
             
         if self.game_over_process():
             self.key_pressed()        
