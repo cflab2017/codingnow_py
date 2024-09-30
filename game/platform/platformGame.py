@@ -90,9 +90,11 @@ class PlatformGame():
         if key not in self.map_data[level]:
             self.map_data[level].update({key:[]})
         
-    def add_map_block(self,level:int, filename:str, x:int, y:int,move_x:int=0,move_y:int=0):
+    def add_map_block(self,level:int, filename:str, x:int, y:int,move_x:int=0,move_y:int=0, num:int=1):
         self.check_map_init(level,'block')            
-        self.map_data[level]['block'].append([filename,x,y,move_x,move_y])
+        # self.map_data[level]['block'].append([filename,x,y,move_x,move_y])
+        for i in range(num):
+            self.map_data[level]['block'].append([filename,x+60*i,y,move_x,move_y])
         
     def add_map_coin(self,level:int, filename:str, x:int, y:int):
         self.check_map_init(level,'coin')            

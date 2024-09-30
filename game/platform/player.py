@@ -10,22 +10,21 @@ class Player():
     jumped = False
     jump_y = 0
     score = 0
-    level = 0
+    level = 1
     gameover = False
     direction = 2
     weapons = []
+    imgs = {}
+    start_position = {1:{'x' : 20,'y':510}}
     def __init__(self,parent,screen:Surface,filename:str, width:int, height:int,flip: bool) -> None:
         self.parent = parent
         self.screen = screen
         self.img_gameover = None  
-        img = pygame.image.load(f'{filename}').convert_alpha()
-        if flip:
-            self.image_src_l = pygame.transform.scale(img,(width,height))
-            self.image_src_r = pygame.transform.flip(self.image_src_l,True,False)
-        else:
-            self.image_src_r = pygame.transform.scale(img,(width,height))
-            self.image_src_l = pygame.transform.flip(self.image_src_r,True,False)
-        self.image = self.image_src_r
+        
+        self.image = self.set_img(self.level, filename,flip,width,height)
+        self.img_idex = 0
+        
+        # self.image = self.get_img()
         self.rect = self.image.get_rect()
         self.game_reset(True)
         self.weapon_pressed = False
@@ -49,6 +48,50 @@ class Player():
             'game_over':None,
         }
         
+    def get_position(self, level=1):
+        if level in self.start_position:
+            x = self.start_position[level]['x']
+            y = self.start_position[level]['y']
+        else:
+            x = self.start_position[1]['x']
+            y = self.start_position[1]['y']
+        return x,y
+            
+    def set_position(self, level:int,x:int=20,y:int=510):
+        self.start_position[level] = {}
+        x = self.start_position[level]['x'] = x
+        y = self.start_position[level]['y'] = y
+            
+    def get_img(self, level=1, dir='right'):
+        if level in self.imgs:
+            img = self.imgs[self.level][dir][self.img_idex]
+        else:
+            img = self.imgs[1][dir][self.img_idex]
+        
+        rect = img.get_rect()
+        rect.x = self.rect.x
+        rect.y = self.rect.y
+        self.rect = rect
+        return img
+        
+    def set_img(self, level:int, filename:str, flip:bool=False, width:int=60, height:int=60):  
+        
+        self.imgs[level] = {
+            'left':[],
+            'right':[],
+            }
+         
+        img = pygame.image.load(f'{filename}').convert_alpha()     
+        if flip:
+            image_src_l = pygame.transform.scale(img,(width,height))
+            image_src_r = pygame.transform.flip(image_src_l,True,False)
+        else:
+            image_src_r = pygame.transform.scale(img,(width,height))
+            image_src_l = pygame.transform.flip(image_src_r,True,False)
+        self.imgs[level]['left'].append(image_src_l)
+        self.imgs[level]['right'].append(image_src_r)
+        return image_src_r
+        
     def set_gameover_image(self,filename):
         img = pygame.image.load(f'{filename}').convert_alpha()
         self.img_gameover = pygame.transform.scale(img,(self.rect.width,self.rect.height))
@@ -56,9 +99,13 @@ class Player():
     def game_reset(self, reload_map):
         self.score = 0
         self.level = 1
-        self.rect.left = 60
-        self.rect.bottom = self.screen.get_height() - 60        
+        
+        self.image = self.get_img(self.level)
+        
+        self.rect = self.image.get_rect()
+        self.rect.x,self.rect.y = self.get_position(self.level) 
         self.rect_pre = self.rect.copy()
+        
         self.gameover = False
         if reload_map:
             self.parent.map_change(self.level)
@@ -81,29 +128,30 @@ class Player():
         
     def set_snd_monster(self,filename):
         self.snd_dic['monster'] = pygame.mixer.Sound(filename)
-        
-    def jump_process(self):
-        dy = 0
-        if len(self.parent.group_block)>0:
-            self.jump_y += 1
-            if self.jump_y > self.JUMP:
-                self.jump_y = 1#self.JUMP
-            dy = self.jump_y
-        else:
-            if self.jumped:
-                if self.jump_y+1 >= self.JUMP:
-                    self.jumped = False
-                else:
-                    self.jump_y += 1
-                    dy = self.jump_y
-        return dy
     
-    def jump(self):
-        if self.jumped == False:
-            if self.snd_dic['jump'] is not None:
-                self.snd_dic['jump'].play()
-            self.jump_y = self.JUMP * (-1)
-            self.jumped = True
+    def rotate(self, angle):
+        self.image = pygame.transform.rotate(self.image_src,angle)
+
+    def check_img_dir(self):
+        if self.rect_pre.x < self.rect.x:
+            self.image = self.get_img(self.level, 'right')
+            self.direction = 2
+        if self.rect_pre.x > self.rect.x:
+            self.image = self.get_img(self.level, 'left')
+            self.direction = -2
+            
+        
+    def check_img_screen_limit(self):        
+        if self.rect.x < 0:
+            self.rect.x = 0
+        if self.rect.right > self.screen.get_width():
+            self.rect.right = self.screen.get_width()
+        if self.rect.y < 0:
+            self.rect.y = 0
+        if self.rect.bottom > self.screen.get_height():
+            self.rect.bottom = self.screen.get_height()
+            self.jumped = False
+            
         
     def key_pressed(self):
         if self.speed == 0:
@@ -136,79 +184,90 @@ class Player():
         if key_press[pygame.K_SPACE]:
             self.jump()
             
-    def rotate(self, angle):
-        self.image = pygame.transform.rotate(self.image_src,angle)
-
-    def check_img_dir(self):
-        if self.rect_pre.x < self.rect.x:
-            self.image = self.image_src_r
-            self.direction = 2
-        if self.rect_pre.x > self.rect.x:
-            self.image = self.image_src_l
-            self.direction = -2
             
-        
-    def check_img_screen_limit(self):        
-        if self.rect.x < 0:
-            self.rect.x = 0
-        if self.rect.right > self.screen.get_width():
-            self.rect.right = self.screen.get_width()
-        if self.rect.y < 0:
-            self.rect.y = 0
-        if self.rect.bottom > self.screen.get_height():
-            self.rect.bottom = self.screen.get_height()
-            self.jumped = False
+    def jump(self):
+        if self.jumped == False:
+            if self.snd_dic['jump'] is not None:
+                self.snd_dic['jump'].play()
+            self.jump_y = self.JUMP * (-1)
+            self.jumped = True
             
-    def check_colliderect_blocks(self):        
+    def jump_process(self):
+        dy = 0
+        if len(self.parent.group_block)>0:
+            self.jump_y += 1
+            if self.jump_y > self.JUMP:
+                self.jump_y = 1#self.JUMP
+            dy = self.jump_y
+        else:
+            if self.jumped:
+                if self.jump_y+1 >= self.JUMP:
+                    self.jumped = False
+                else:
+                    self.jump_y += 1
+                    dy = self.jump_y
+        return dy
+    
+            
+    def check_colliderect_blocks(self):
         dx = self.rect.x - self.rect_pre.x
         dy = self.rect.y - self.rect_pre.y
         self.rect = self.rect_pre.copy()
-        
         rect  = self.rect_pre.copy()
         xc = pygame.Rect(rect.x + dx, rect.y, rect.width, rect.height)#앞으로
         yc = pygame.Rect(rect.x, rect.y + dy, rect.width, rect.height)#위로
-        yc2 = pygame.Rect(rect.x, rect.y + dy/2, rect.width, rect.height)#위로
+        yc.centerx += int(rect.width*0.4/2)
+        yc.width = int(rect.width*0.6)
 
-        for block in self.parent.group_block:
-            
-            if block.move_y != 0:
-                xc.height -= abs(block.direction)+4
-            if block.move_x != 0:
-                yc.width -= abs(block.direction)+4
-                yc2.width -= abs(block.direction)+4
+        for i,block in enumerate(self.parent.group_block):
+            brect = block.rect.copy()
+            is_up = False
+            is_down = False
                 
-            if block.rect.colliderect(xc):
-                dx = 0     
-            if block.rect.colliderect(yc):
-                col_thresh = block.rect.height/2
-                if abs((rect.top + dy) - block.rect.bottom) < col_thresh:#블럭 아래?
-                    self.jump_y = 0 
-                    dy = block.rect.bottom - rect.top #점프중에면 블럭 아래까지만 점프
-                elif abs((rect.bottom + dy) - block.rect.top) < col_thresh:#블럭 위에?
-                    rect.bottom = block.rect.top - 1 #블럭위에 올려 놓는다.
-                    self.jumped = False #공중에 있으면 초기화
+            if brect.bottom < self.rect_pre.top: #블럭 아래 있음
+                # if brect.height <= self.JUMP:
+                brect.top -= self.JUMP
+                brect.height += self.JUMP+5
+                is_down = True
+            else:
+            # if brect.top > self.rect_pre.bottom: #블럭 위에 있음
+                brect.height += self.JUMP
+                is_up = True
+                 
+            if brect.colliderect(xc):
+                if self.rect_pre.x < brect.x and dx<0: #왼쪽에
+                    pass
+                elif self.rect_pre.x > brect.x and dx>0: #오른쪽에
+                    pass
+                else:
+                    dx = 0
+                
+            if brect.colliderect(yc):
+                
+                if is_down:#블럭 아래?
+                    if self.jumped:                        
+                        dy = 0
+                        self.jump_y = abs(self.jump_y) 
+                        self.rect.top =  brect.bottom+1 #블럭위에 올려 놓는다.
+                        self.rect_pre = self.rect.copy()
+                elif is_up:#블럭 위에?
+                    self.rect.bottom =  brect.top #블럭위에 올려 놓는다.
+                    self.rect_pre = self.rect.copy()
                     dy = 0
+                    self.jump_y = 0
+                    self.jumped = False
+                        
                     # if block.move_y != 0:
                     #     dy += block.direction
                     
                     if block.move_x != 0:
                         dx += block.direction
-
-            if block.rect.colliderect(yc2):
-                col_thresh = block.rect.height/2
-                if abs((rect.top + dy/2) - block.rect.bottom) < col_thresh:#블럭 아래?
-                    self.jump_y = 0 #점프 중이면 초기화
-                    dy = block.rect.bottom - rect.top #점프중에면 블럭 아래까지만 점프
-                elif abs((rect.bottom + dy/2) - block.rect.top) < col_thresh:#블럭 위에?
-                    rect.bottom = block.rect.top - 1 #블럭위에 올려 놓는다.
-                    self.jumped = False #공중에 있으면 초기화
+                else:
                     dy = 0
-                    if block.move_y != 0:
-                        dy += block.direction
-
         self.rect.x += dx
         self.rect.y += dy        
         self.rect_pre = self.rect.copy()
+        return dy
         
     def game_over_process(self):
         if self.gameover:
@@ -259,10 +318,10 @@ class Player():
         if pygame.sprite.spritecollide(self, self.parent.group_exitDoor, False):
             self.level += 1
             
-            self.rect.left = 60
-            self.rect.bottom = self.screen.get_height() - 60        
-            self.rect_pre = self.rect.copy()
             self.level = self.parent.map_change(self.level)
+            self.image = self.get_img(self.level)            
+            self.rect.x,self.rect.y = self.get_position(self.level)      
+            self.rect_pre = self.rect.copy()
                 
     def draw_message(self, msg:str, color:tuple, x:int, y:int):
         msg = f'{msg}'
