@@ -1,9 +1,22 @@
-import pygame
+
+import os
+try:
+    import pygame
+except:
+    os.system('pip install pygame')
+    import pygame
+    
 import pygame.draw
 import pygame.mouse
 import pygame.rect
 import pygame.sprite
-import clipboard
+from pygame.event import Event
+
+try:
+    import clipboard
+except:
+    os.system('pip install clipboard')
+    import clipboard
 
 from codingnow.game.platform.player import *
 from codingnow.game.platform.block import *
@@ -17,6 +30,7 @@ from codingnow.game.platform.weapon import *
 class PlatformGame():
     player:Player = None
     on_mouse_point = False
+    event_func_p = None
     def __init__(self,screen:Surface) -> None:
         self.screen = screen
         self.player = None
@@ -33,6 +47,7 @@ class PlatformGame():
         self.msg_status_curr = ''
         self.msg_status_tick = 0
         self.copy_pressed = False
+        # self.event_func_p = self.event_func()
         self.mfont30 = pygame.font.SysFont('malgungothic', 30)    
 
     def map_change(self, level):
@@ -75,7 +90,20 @@ class PlatformGame():
             print(ex)
             
         return level
-                        
+    
+    def event_func(event:Event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                print('aaaa')
+                
+    def check_quit(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return False
+            if self.event_func_p is not None:
+                self.event_func_p(event)
+        return True
+
     def add_player(self,filename:str, flip:bool=False, width:int=60, height:int=60):
         self.player = Player(self,self.screen,filename,width,height,flip)
         return self.player
