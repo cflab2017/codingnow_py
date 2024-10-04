@@ -31,6 +31,7 @@ class PlatformGame():
     player:Player = None
     on_mouse_point = False
     event_func_p = None
+    bgimgs = {}
     def __init__(self,screen:Surface) -> None:
         self.screen = screen
         self.player = None
@@ -108,9 +109,14 @@ class PlatformGame():
         self.player = Player(self,self.screen,filename,width,height,flip)
         return self.player
     
-    def add_bg_image(self,filename:str):        
+    def add_bg_image(self, filename:str,level:int=1):        
         img = pygame.image.load(f'{filename}').convert_alpha()
-        self.image_bg = pygame.transform.scale(img,(self.screen.get_width(),self.screen.get_height()))
+        image_bg = pygame.transform.scale(img,(self.screen.get_width(),self.screen.get_height()))
+        if (level != 1) and (1 not in self.bgimgs):
+            self.bgimgs[1] = image_bg
+            
+        self.bgimgs[level] = image_bg
+        # print(self.bgimgs)
 
     def check_map_init(self, level, key):
         if level not in self.map_data:
@@ -148,16 +154,15 @@ class PlatformGame():
         self.check_map_init(level,'exit')
         self.map_data[level]['exit'].append([filename,x,y])
 
-
-    def add_bullet(self,filename):        
+    def add_bullet(self,filename):
         self.group_bullet.add(Bullet(self.screen,filename,self.player))
         
-    def draw_mouse_point(self):        
+    def draw_mouse_point(self):
         if pygame.mouse.get_focused():
             pygame.mouse.set_visible(False)
             x,y = pygame.mouse.get_pos()
             x = x - (x%10)
-            y = y - (y%10)            
+            y = y - (y%10)
             # pygame.mouse.set_pos(x,y)
             
             key_press = pygame.key.get_pressed()
@@ -209,19 +214,32 @@ class PlatformGame():
         if self.msg_status_tick != 0:
             if self.msg_status_tick < pygame.time.get_ticks():
                 self.msg_status_tick = 0
-                self.msg_status_curr = ''                
-            else:                
+                self.msg_status_curr = ''
+            else:
                 img = self.mfont30.render(self.msg_status_curr, True, (255,255,255),(0,0,0))
                 img.set_alpha(80)
                 rect = img.get_rect()
                 rect.centerx = self.screen.get_width()/2
                 rect.centery = self.screen.get_height()/2
                 self.screen.blit(img, rect)
+                
+    def draw_bg_img(self):
+        img = None
+        if self.player is not None:
+            if self.player.level in self.bgimgs:
+                img = self.bgimgs[self.player.level]
+                
+        if img is None:
+            if 1 in self.bgimgs:
+                img = self.bgimgs[1]
             
-    def draw(self):
-        if self.image_bg is not None:
-            self.screen.blit(self.image_bg,(0,0))
-        if self.player is not None:            
+        if img is not None:
+            self.screen.blit(img,(0,0))
+            
+    def draw(self):        
+        self.draw_bg_img()
+        
+        if self.player is not None:
             self.player.draw()
             
         for bullet in self.group_bullet:

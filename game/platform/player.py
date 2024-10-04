@@ -235,11 +235,18 @@ class Player():
             brect = block.rect.copy()
             if brect.colliderect(xc):
                 temp_yc = xc.copy()
-                temp_yc.y -= temp_yc.height
+                temp_yc.y -= brect.height
                 if not brect.colliderect(temp_yc):
                     top = brect.top
                 else:
                     return 0
+            else:
+                temp_yc = xc.copy()
+                temp_yc.y -= brect.height
+                # pygame.draw.rect(self.screen,(0,0,0),temp_yc)
+                if brect.colliderect(temp_yc):
+                    return 0
+                
         return top
                 
             
@@ -258,15 +265,15 @@ class Player():
             is_up = False
             is_down = False
                 
-            if brect.bottom < self.rect_pre.top: #블럭 아래 있음
+            if brect.bottom <= self.rect_pre.top: #블럭 아래 있음
                 brect.top -= self.JUMP
-                brect.height += self.JUMP+5
+                brect.height += self.JUMP
                 is_down = True
             else:#블럭 위에 있음
                 if self.jumped:
                     brect.height += self.JUMP
                 is_up = True
-                 
+            # pygame.draw.rect(self.screen,(0,0,0),brect)
             if brect.colliderect(xc):
                 if self.rect_pre.x < brect.x and dx<0: #왼쪽에
                     pass
