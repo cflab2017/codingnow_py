@@ -20,12 +20,13 @@ class Player():
         self.parent = parent
         self.screen = screen
         self.img_gameover = None  
-        
+        self.rect = None
+        self.image = None
         self.image = self.set_img(self.level, filename,flip,width,height)
         self.img_idex = 0
         
         # self.image = self.get_img()
-        self.rect = self.image.get_rect()
+        # self.rect = self.image.get_rect()
         self.game_reset(True)
         self.weapon_pressed = False
         # self.image_bullet = None        
@@ -90,6 +91,16 @@ class Player():
             image_src_l = pygame.transform.flip(image_src_r,True,False)
         self.imgs[level]['left'].append(image_src_l)
         self.imgs[level]['right'].append(image_src_r)
+        
+        if self.level == level:
+            self.image = image_src_r
+            if self.rect is not None:
+                self.get_img(level)
+                # self.rect.x,self.rect.y = self.get_position(self.level)      
+                self.rect_pre = self.rect.copy()
+            else:
+                self.rect = self.image.get_rect()
+                
         return image_src_r
         
     def set_gameover_image(self,filename):
@@ -175,10 +186,19 @@ class Player():
         else:
             self.weapon_pressed = False
             
+            
         if key_press[pygame.K_LEFT]:
+            top = self.check_up_colliderect_blocks(-self.speed)
+            if top:
+                self.rect.bottom = top
+                self.rect_pre = self.rect.copy()
             self.rect.centerx -= self.speed
             
         if key_press[pygame.K_RIGHT]:
+            top = self.check_up_colliderect_blocks(self.speed)
+            if top:
+                self.rect.bottom = top
+                self.rect_pre = self.rect.copy()
             self.rect.centerx += self.speed
             
         if key_press[pygame.K_SPACE]:
@@ -208,6 +228,21 @@ class Player():
                     dy = self.jump_y
         return dy
     
+    def check_up_colliderect_blocks(self,dx):
+        xc = pygame.Rect(self.rect.x + dx, self.rect.y, self.rect.width, self.rect.height)#앞으로        
+        top = 0
+        for i,block in enumerate(self.parent.group_block):
+            brect = block.rect.copy()
+            if brect.colliderect(xc):
+                temp_yc = xc.copy()
+                temp_yc.y -= temp_yc.height
+                if not brect.colliderect(temp_yc):
+                    top = brect.top
+                else:
+                    return 0
+        return top
+                
+            
             
     def check_colliderect_blocks(self):
         dx = self.rect.x - self.rect_pre.x
@@ -218,20 +253,18 @@ class Player():
         yc = pygame.Rect(rect.x, rect.y + dy, rect.width, rect.height)#위로
         yc.centerx += int(rect.width*0.4/2)
         yc.width = int(rect.width*0.6)
-
         for i,block in enumerate(self.parent.group_block):
             brect = block.rect.copy()
             is_up = False
             is_down = False
                 
             if brect.bottom < self.rect_pre.top: #블럭 아래 있음
-                # if brect.height <= self.JUMP:
                 brect.top -= self.JUMP
                 brect.height += self.JUMP+5
                 is_down = True
-            else:
-            # if brect.top > self.rect_pre.bottom: #블럭 위에 있음
-                brect.height += self.JUMP
+            else:#블럭 위에 있음
+                if self.jumped:
+                    brect.height += self.JUMP
                 is_up = True
                  
             if brect.colliderect(xc):
@@ -240,10 +273,14 @@ class Player():
                 elif self.rect_pre.x > brect.x and dx>0: #오른쪽에
                     pass
                 else:
-                    dx = 0
-                
-            if brect.colliderect(yc):
-                
+                    dx = 0                    
+                if not brect.colliderect(yc) and block.move_x != 0 :
+                    if self.rect_pre.x < brect.x and block.direction<0: #왼쪽에
+                        dx += block.direction
+                    elif self.rect_pre.x > brect.x and block.direction>0: #오른쪽에
+                        dx += block.direction
+            
+            if brect.colliderect(yc):                
                 if is_down:#블럭 아래?
                     if self.jumped:                        
                         dy = 0
@@ -319,7 +356,7 @@ class Player():
             self.level += 1
             
             self.level = self.parent.map_change(self.level)
-            self.image = self.get_img(self.level)            
+            self.image = self.get_img(self.level)
             self.rect.x,self.rect.y = self.get_position(self.level)      
             self.rect_pre = self.rect.copy()
                 
