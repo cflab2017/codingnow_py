@@ -32,6 +32,7 @@ class PlatformGame():
     on_mouse_point = False
     event_func_p = None
     bgimgs = {}
+    image_sto = {}
     def __init__(self,screen:Surface) -> None:
         self.screen = screen
         self.player = None
@@ -65,28 +66,35 @@ class PlatformGame():
                 
             if level not in self.map_data:
                 return None
-            
             for key in self.map_data[level]:
                 item = self.map_data[level][key]
                 
                 for values in item:
                     filename = values[0]
+                    
+                    if filename not in self.image_sto:
+                        self.image_sto[filename] = pygame.image.load(f'{filename}').convert_alpha()
+                    else:
+                        print('aa')
+                    img = self.image_sto[filename]
+                    
                     x  = values[1]
                     y  = values[2]                        
                     if key == 'block':
                         move_x = values[3] 
                         move_y = values[4]
-                        self.group_block.add(Block(self.screen,filename,x,y,move_x,move_y))
+                        self.group_block.add(Block(self.screen,img,x,y,move_x,move_y))
                     if key == 'coin':
-                        self.group_coin.add(Coin(self.screen,filename,x,y))
+                        self.group_coin.add(Coin(self.screen,img,x,y))
                     if key == 'monster':
-                        self.group_monster.add(Monster(self.screen,filename,x,y))
+                        self.group_monster.add(Monster(self.screen,img,x,y))
                     if key == 'exit':
-                        self.group_exitDoor.add(ExitDoor(self.screen,filename,x,y))
+                        self.group_exitDoor.add(ExitDoor(self.screen,img,x,y))
                     if key == 'lava':
-                        self.group_lava.add(Lava(self.screen,filename,x,y))
+                        self.group_lava.add(Lava(self.screen,img,x,y))
                     if key == 'weapon':
-                        self.group_weapon.add(Weapon(self.screen,filename,x,y))
+                        self.group_weapon.add(Weapon(self.screen,filename,img,x,y))
+                        
         except Exception as ex:
             print(ex)
             
@@ -155,7 +163,10 @@ class PlatformGame():
         self.map_data[level]['exit'].append([filename,x,y])
 
     def add_bullet(self,filename):
-        self.group_bullet.add(Bullet(self.screen,filename,self.player))
+        if filename not in self.image_sto:
+            self.image_sto[filename] = pygame.image.load(f'{filename}').convert_alpha()
+        img = self.image_sto[filename]
+        self.group_bullet.add(Bullet(self.screen,img,self.player))
         
     def draw_mouse_point(self):
         if pygame.mouse.get_focused():

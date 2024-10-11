@@ -5,11 +5,11 @@ import pygame.transform
 import random
 
 class Coin(pygame.sprite.Sprite):
-    def __init__(self,screen:Surface, filename:str,x:int, y:int):
+    def __init__(self,screen:Surface, img,x:int, y:int):
         pygame.sprite.Sprite.__init__(self)
                     
         self.screen = screen        
-        img = pygame.image.load(f'{filename}').convert_alpha()
+        # img = pygame.image.load(f'{filename}').convert_alpha()
         self.image_src = pygame.transform.scale(img,(30,30))
         self.image = self.image_src
         self.rect = self.image.get_rect()

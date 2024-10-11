@@ -5,11 +5,11 @@ import pygame.transform
 
 class Block(pygame.sprite.Sprite):
 
-    def __init__(self,screen:Surface, filename:str,x:int, y:int,move_x:int=0,move_y:int=0):
+    def __init__(self,screen:Surface, img, x:int, y:int,move_x:int=0,move_y:int=0):
         pygame.sprite.Sprite.__init__(self)
             
         self.screen = screen        
-        img = pygame.image.load(f'{filename}').convert_alpha()
+        # img = pygame.image.load(f'{filename}').convert_alpha()
         self.image = pygame.transform.scale(img,(60,30))
         self.rect = self.image.get_rect()
         self.rect.x = x

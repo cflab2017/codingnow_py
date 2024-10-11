@@ -4,11 +4,11 @@ import pygame.sprite
 import pygame.transform
 
 class Monster(pygame.sprite.Sprite):
-    def __init__(self,screen:Surface, filename:str,x:int, y:int):
+    def __init__(self,screen:Surface, img,x:int, y:int):
         pygame.sprite.Sprite.__init__(self)
             
         self.screen = screen        
-        img = pygame.image.load(f'{filename}').convert_alpha()
+        # img = pygame.image.load(f'{filename}').convert_alpha()
         self.image = pygame.transform.scale(img,(40,40))
         self.rect = self.image.get_rect()
         self.rect.x = x
