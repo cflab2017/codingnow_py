@@ -88,8 +88,8 @@ class PlatformGame():
                         self.group_coin.add(Coin(self.screen,img,x,y))
                     if key == 'monster':
                         move_x = values[3] 
-                        speed = values[4] 
-                        self.group_monster.add(Monster(self.screen,img,x,y,move_x,speed))
+                        move_y = values[4]
+                        self.group_monster.add(Monster(self.screen,img,x,y,move_x,move_y))
                     if key == 'exit':
                         self.group_exitDoor.add(ExitDoor(self.screen,img,x,y))
                     if key == 'lava':
@@ -152,9 +152,9 @@ class PlatformGame():
         #     self.player.set_bullet_img(filename)
             
         
-    def add_map_mons(self,level:int, filename:str, x:int, y:int,move:int=25,speed:int=1):
+    def add_map_mons(self,level:int, filename:str, x:int, y:int,move_x:int=1,move_y:int=0):
         self.check_map_init(level,'monster')
-        self.map_data[level]['monster'].append([filename,x,y,move,speed])
+        self.map_data[level]['monster'].append([filename,x,y,move_x,move_y])
         
     def add_map_lava(self,level:int, filename:str, x:int, y:int, num:int):
         self.check_map_init(level,'lava')        
