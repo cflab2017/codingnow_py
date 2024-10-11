@@ -93,10 +93,16 @@ class Led_ctrl:
     #             self.key_press_state[key]['pressed_tick'] = 0
     #             self.key_press[key] = False
                 
-    def get_key_press(self, key):        
+    def get_key_press(self, key, auto=False):        
+        if key not in self.key_press:
+            self.key_press_state[key] = {'pressed':False,'tick':0}            
+            self.key_press[key] = False
+                  
         if key in self.key_press:
             if pygame.key.get_pressed()[key]:
-                if self.key_press_state[key]['pressed'] == False:
+                if auto==False:
+                    self.key_press[key] = True
+                elif self.key_press_state[key]['pressed'] == False:
                     self.key_press_state[key]['pressed_tick'] = pygame.time.get_ticks() + 200
                     self.key_press_state[key]['pressed'] = True
                     self.key_press[key] = True
@@ -109,6 +115,7 @@ class Led_ctrl:
                 self.key_press_state[key]['pressed_tick'] = 0
                 self.key_press[key] = False
             return self.key_press[key]
+            
         return False
 
     def draw_grid(self):
@@ -277,9 +284,9 @@ def led_off(*idexs):
     global main
     main.led_off(idexs)
     
-def get_key_press(key):
+def get_key_press(key, auto=False):
     global main
-    return main.get_key_press(key)
+    return main.get_key_press(key,auto)
 
 def led_init(on_disp_grid = True,
             on_disp_num = True,
