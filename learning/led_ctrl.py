@@ -1,9 +1,18 @@
-import pygame
+import os
+try:
+    import pygame
+except:
+    os.system('pip install pygame')
+    import pygame
 from pygame import *
 # import codingnow.game
 import threading
 import time
-import clipboard
+try:
+    import clipboard
+except:
+    os.system('pip install clipboard')
+    import clipboard
 
 
 class Led_ctrl:
@@ -13,6 +22,7 @@ class Led_ctrl:
     on_disp_num = True
     on_disp_circle_mode = True
     on_all_led = False
+    on_mouse_click = False
     
     led_state = {}
     mouse_click_list = []
@@ -104,7 +114,7 @@ class Led_ctrl:
     def draw_grid(self):
                     
         idex = 0
-        if pygame.mouse.get_focused() and pygame.mouse.get_pressed()[0]:
+        if self.on_mouse_click and pygame.mouse.get_focused() and pygame.mouse.get_pressed()[0]:
             mouse_pos = pygame.mouse.get_pos()
         else:
             mouse_pos = None
@@ -190,7 +200,7 @@ class Led_ctrl:
                                         
     def led_on(self,*idexs):
         
-        print(idexs)
+        # print(idexs)
         for idex in idexs:
             if idex in self.led_state:
                 self.led_state[idex]['on'] = True
