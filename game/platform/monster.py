@@ -4,7 +4,7 @@ import pygame.sprite
 import pygame.transform
 
 class Monster(pygame.sprite.Sprite):
-    def __init__(self,screen:Surface, img,x:int, y:int):
+    def __init__(self,screen:Surface, img,x:int, y:int, move:int=25, speed:int=1):
         pygame.sprite.Sprite.__init__(self)
             
         self.screen = screen        
@@ -13,12 +13,13 @@ class Monster(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.direction = 1
+        self.direction = speed
+        self.move = move
         self.delay_counter = 0
 
     def update(self):
         self.rect.x += self.direction
         self.delay_counter += 1
-        if abs(self.delay_counter) > 25:
+        if abs(self.delay_counter) > self.move:
             self.direction *= -1
             self.delay_counter *= -1
