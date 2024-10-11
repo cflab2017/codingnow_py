@@ -74,8 +74,8 @@ class PlatformGame():
                     
                     if filename not in self.image_sto:
                         self.image_sto[filename] = pygame.image.load(f'{filename}').convert_alpha()
-                    else:
-                        print('aa')
+                    # else:
+                    #     print('aa')
                     img = self.image_sto[filename]
                     
                     x  = values[1]
@@ -103,7 +103,8 @@ class PlatformGame():
     def event_func(event:Event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
-                print('aaaa')
+                # print('aaaa')
+                pass
                 
     def check_quit(self):
         for event in pygame.event.get():
