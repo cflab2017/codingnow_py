@@ -13,6 +13,7 @@ class Player():
     level = 1
     gameover = False
     direction = 2
+    hp = 3
     weapons = []
     imgs = {}
     start_position = {1:{'x' : 20,'y':510}}
@@ -33,6 +34,7 @@ class Player():
         self.msg_level_text = None
         self.msg_score_text = None
         self.msg_weapon_text = None
+        self.msg_hp_text = None
         self.mfont20 = pygame.font.SysFont('malgungothic', 20)
         self.mfont30 = pygame.font.SysFont('malgungothic', 30)
         self.mfont40 = pygame.font.SysFont('malgungothic', 40)
@@ -109,7 +111,8 @@ class Player():
         
     def game_reset(self, reload_map):
         self.score = 0
-        self.level = 1
+        self.level = 1        
+        self.hp = 3
         
         self.image = self.get_img(self.level)
         
@@ -341,23 +344,42 @@ class Player():
         #     if self.snd_dic['weapon'] is not None:
         #         self.snd_dic['weapon'].play()
                 
+        if pygame.sprite.spritecollide(self, self.parent.group_hp, True):
+            self.hp += 1
+            if self.snd_dic['coin'] is not None:
+                self.snd_dic['coin'].play()
+                
         if pygame.sprite.spritecollide(self, self.parent.group_coin, True):
             self.score += 10
             if self.snd_dic['coin'] is not None:
                 self.snd_dic['coin'].play()
         #몬스터
         if pygame.sprite.spritecollide(self, self.parent.group_monster, False):
+            self.hp -= 1
             if self.snd_dic['game_over'] is not None:
                 self.snd_dic['game_over'].play()
                 # self.game_reset(True)
-            self.gameover = True
+            if self.hp <= 0:
+                self.gameover = True
+            else:
+                self.level = self.parent.map_change(self.level)
+                self.image = self.get_img(self.level)
+                self.rect.x,self.rect.y = self.get_position(self.level)      
+                self.rect_pre = self.rect.copy()
 
         # 용암 충돌확인? 
         if pygame.sprite.spritecollide(self, self.parent.group_lava, False):
+            self.hp -= 1
             if self.snd_dic['game_over'] is not None:
                 self.snd_dic['game_over'].play()
                 # self.game_reset(True)
-            self.gameover = True
+            if self.hp <= 0:
+                self.gameover = True
+            else:
+                self.level = self.parent.map_change(self.level)
+                self.image = self.get_img(self.level)
+                self.rect.x,self.rect.y = self.get_position(self.level)      
+                self.rect_pre = self.rect.copy()
             
         if pygame.sprite.spritecollide(self, self.parent.group_exitDoor, False):
             self.level += 1
@@ -390,6 +412,12 @@ class Player():
         self.msg_weapon_color = color
         self.msg_weapon_text = text
         
+    def set_msg_hp(self, x=10,y=130, color = (0,0,0), text = 'HP : '):
+        self.msg_hp_x = x
+        self.msg_hp_y = y
+        self.msg_hp_color = color
+        self.msg_hp_text = text
+        
     def draw(self):
         if self.msg_score_text is not None:
             self.draw_message(f'{self.msg_score_text}{self.score}',
@@ -408,6 +436,12 @@ class Player():
                             self.msg_weapon_color, 
                             x=self.msg_weapon_x,
                             y=self.msg_weapon_y)
+            
+        if self.msg_hp_text is not None:
+            self.draw_message(f'{self.msg_hp_text}{self.hp}',
+                            self.msg_hp_color, 
+                            x=self.msg_hp_x,
+                            y=self.msg_hp_y)
             
         if self.game_over_process():
             self.key_pressed()        

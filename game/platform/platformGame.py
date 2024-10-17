@@ -26,6 +26,7 @@ from codingnow.game.platform.lava import *
 from codingnow.game.platform.bullet import *
 from codingnow.game.platform.exitdoor import *
 from codingnow.game.platform.weapon import *
+from codingnow.game.platform.hp import *
 
 class PlatformGame():
     player:Player = None
@@ -43,6 +44,7 @@ class PlatformGame():
         self.group_exitDoor = pygame.sprite.Group()
         self.group_weapon = pygame.sprite.Group()
         self.group_bullet = pygame.sprite.Group()
+        self.group_hp = pygame.sprite.Group()
         self.image_bg = None
         self.map_data = {}
         self.msg_status=[]
@@ -60,6 +62,7 @@ class PlatformGame():
         self.group_lava.empty()
         self.group_exitDoor.empty()
         self.group_weapon.empty()
+        self.group_hp.empty()
         try:            
             if level not in self.map_data:
                 level = 1
@@ -86,6 +89,8 @@ class PlatformGame():
                         self.group_block.add(Block(self.screen,img,x,y,move_x,move_y))
                     if key == 'coin':
                         self.group_coin.add(Coin(self.screen,img,x,y))
+                    if key == 'hp':
+                        self.group_hp.add(Hp(self.screen,img,x,y))
                     if key == 'monster':
                         move_x = values[3] 
                         move_y = values[4]
@@ -145,6 +150,10 @@ class PlatformGame():
         self.check_map_init(level,'coin')            
         self.map_data[level]['coin'].append([filename,x,y])        
                 
+    def add_map_hp(self,level:int, filename:str, x:int, y:int):
+        self.check_map_init(level,'hp')            
+        self.map_data[level]['hp'].append([filename,x,y])    
+        
     def add_map_weapon(self,level:int, filename:str, x:int, y:int):
         self.check_map_init(level,'weapon')            
         self.map_data[level]['weapon'].append([filename,x,y])  
@@ -265,6 +274,7 @@ class PlatformGame():
         
         self.group_block.update()
         self.group_coin.update()
+        self.group_hp.update()
         self.group_weapon.update()
         self.group_monster.update()
         self.group_lava.update()
@@ -274,6 +284,7 @@ class PlatformGame():
         self.group_exitDoor.draw(self.screen)
         self.group_block.draw(self.screen)
         self.group_coin.draw(self.screen)
+        self.group_hp.draw(self.screen)
         self.group_weapon.draw(self.screen)
         self.group_monster.draw(self.screen)
         self.group_lava.draw(self.screen)
