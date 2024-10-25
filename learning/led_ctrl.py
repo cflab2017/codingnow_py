@@ -13,7 +13,7 @@ try:
 except:
     os.system('pip install clipboard')
     import clipboard
-
+from codingnow.learning.drawImg import *
 
 class Led_ctrl:
     color_led = (192,0,0)
@@ -26,6 +26,7 @@ class Led_ctrl:
     
     led_state = {}
     mouse_click_list = []
+    group_icon = pygame.sprite.Group()
     
     key_press = {
         pygame.K_UP:False,
@@ -61,6 +62,22 @@ class Led_ctrl:
         self.mfont40 = pygame.font.SysFont("malgungothic", 40)
         self.create_grid()
         
+    def set_img(self,idex,filename):
+        img_rect = pygame.Rect(0,0,self.width,self.width)
+        img = DrawImg(self.screen,filename,img_rect)
+        
+        if idex in self.led_state:
+            self.led_state[idex]['active'] = True
+            self.led_state[idex]['img'] = img
+            
+    def set_img_all(self,filename):
+        img_rect = pygame.Rect(0,0,self.width,self.width)
+        img = DrawImg(self.screen,filename,img_rect)
+        
+        for idex in self.led_state:
+            self.led_state[idex]['active'] = True
+            self.led_state[idex]['img'] = img
+        
     def create_grid(self):
         self.rect_leds.clear()
         self.led_state.clear()
@@ -71,7 +88,7 @@ class Led_ctrl:
             for col in range(self.colum):
                 rect = pygame.Rect(col*self.width,row*self.width,self.width,self.width)
                 leds.append(rect)
-                self.led_state[idex] = {'active':False, 'on':False, 'color':self.color_led}
+                self.led_state[idex] = {'active':False, 'on':False, 'color':self.color_led, 'img':None}
                 idex += 1
             self.rect_leds.append(leds)
             
@@ -178,18 +195,24 @@ class Led_ctrl:
         if led['active']==False:
             return
         
-        temp_surface = Surface((rect.width,rect.height))
-        temp_surface.fill(self.color_background)
-        if led['on']:
-            temp_surface.set_alpha(250)
+        if led['img'] is not None:
+            if led['on']:
+                led['img'].draw(rect)
+            else:
+                pass
         else:
-            temp_surface.set_alpha(50)
-        if self.on_disp_circle_mode:
-            pygame.draw.circle(temp_surface,led['color'],(rect.width/2,rect.width/2),(rect.width-2)/2)
-        else:
-            pygame.draw.rect(temp_surface, led['color'],(1,1,rect.width-2, rect.height-2),0)
-        # 
-        self.screen.blit(temp_surface,rect)
+            temp_surface = Surface((rect.width,rect.height))
+            temp_surface.fill(self.color_background)
+            if led['on']:
+                temp_surface.set_alpha(250)
+            else:
+                temp_surface.set_alpha(50)
+            if self.on_disp_circle_mode:
+                pygame.draw.circle(temp_surface,led['color'],(rect.width/2,rect.width/2),(rect.width-2)/2)
+            else:
+                pygame.draw.rect(temp_surface, led['color'],(1,1,rect.width-2, rect.height-2),0)
+            # 
+            self.screen.blit(temp_surface,rect)
     
     def led_enable(self, *idexs, color=None):
         if color is None:
@@ -255,6 +278,7 @@ class Led_ctrl:
             self.screen.fill(self.color_background)
             # if self.loop is not None:
             #     self.loop()
+            
             self.draw_grid()
             # self.check_clipboard()
             # self.draw_led()
@@ -274,6 +298,13 @@ def init(setup,loop,colum = 8,row = 8,width = 40):
 
 
 
+def set_img(idex,filename):
+    global main
+    main.set_img(idex,filename)
+
+def set_img_all(filename):
+    global main
+    main.set_img_all(filename)
 
 def led_on(*idexs):
     global main
