@@ -16,6 +16,7 @@ class Player():
     hp = 3
     weapons = []
     imgs = {}
+    jump_cnt = 0
     start_position = {1:{'x' : 20,'y':510}}
     def __init__(self,parent,screen:Surface,filename:str, width:int, height:int,flip: bool) -> None:
         self.parent = parent
@@ -35,6 +36,7 @@ class Player():
         self.msg_score_text = None
         self.msg_weapon_text = None
         self.msg_hp_text = None
+        self.msg_jumpcnt_text = None
         self.mfont20 = pygame.font.SysFont('malgungothic', 20)
         self.mfont30 = pygame.font.SysFont('malgungothic', 30)
         self.mfont40 = pygame.font.SysFont('malgungothic', 40)
@@ -112,8 +114,9 @@ class Player():
     def game_reset(self, reload_map):
         self.score = 0
         self.level = 1        
+        self.weapons.clear()
         self.hp = 3
-        
+        self.jump_cnt = 0
         self.image = self.get_img(self.level)
         
         self.rect = self.image.get_rect()
@@ -210,6 +213,7 @@ class Player():
             
     def jump(self):
         if self.jumped == False:
+            self.jump_cnt += 1
             if self.snd_dic['jump'] is not None:
                 self.snd_dic['jump'].play()
             self.jump_y = self.JUMP * (-1)
@@ -418,6 +422,12 @@ class Player():
         self.msg_hp_color = color
         self.msg_hp_text = text
         
+    def set_msg_jumpcnt(self, x=10,y=170, color = (0,0,0), text = '점프 : '):
+        self.msg_jumpcnt_x = x
+        self.msg_jumpcnt_y = y
+        self.msg_jumpcnt_color = color
+        self.msg_jumpcnt_text = text
+        
     def draw(self):
         if self.msg_score_text is not None:
             self.draw_message(f'{self.msg_score_text}{self.score}',
@@ -442,6 +452,12 @@ class Player():
                             self.msg_hp_color, 
                             x=self.msg_hp_x,
                             y=self.msg_hp_y)
+            
+        if self.msg_jumpcnt_text is not None:
+            self.draw_message(f'{self.msg_jumpcnt_text}{self.jump_cnt}',
+                            self.msg_jumpcnt_color, 
+                            x=self.msg_jumpcnt_x,
+                            y=self.msg_jumpcnt_y)
             
         if self.game_over_process():
             self.key_pressed()        
