@@ -33,8 +33,20 @@ class Enemy(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.x = 0
 		self.rect.y = 0
-		self.prog_width = 50
-		self.rect_hp = pygame.Rect(0,0,self.prog_width,10)
+		self.prog_width = int(self.rect.width*0.7)
+		self.prog_height = int(self.rect.height*0.3)
+		if self.prog_width > 50:
+			self.prog_width = 50
+			
+		if self.prog_width < 20:
+			self.prog_width = 20
+			
+		if self.prog_height > 20:
+			self.prog_height = 20
+		if self.prog_height < 5:
+			self.prog_height = 5
+			
+		self.rect_hp = pygame.Rect(0,0,self.prog_width,self.prog_height)
 		
 		self.w_image = w_img
 		self.w_damage = w_damage

@@ -100,6 +100,7 @@ class Player():
 	def set_snd_shock(self,filename):
 		self.snd_dic['shock'] = pygame.mixer.Sound(filename)
 		
+######################################################################################
 	def set_weapon(self, filename, width, height, damage,speed,delay, flip=False):
 		img = pygame.image.load(f'{filename}').convert_alpha()
 		img = pygame.transform.scale(img, (width, height))
@@ -116,6 +117,7 @@ class Player():
 		self.weapon_def_speed = self.weapon_speed
 		self.weapon_def_delay = self.weapon_delay
 	
+######################################################################################
 	def key_pressed(self):
 		key_press = pygame.key.get_pressed()
 		

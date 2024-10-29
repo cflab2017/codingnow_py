@@ -57,6 +57,7 @@ class SpaceWar():
     def set_msg_hp(self, x=10,y=130, color = (0,0,0), text = 'HP : '):
         self.message.set_msg_hp(x,y,color,text)
           
+######################################################################################
     def add_bg_image(self, level, filename):
         
         img = pygame.image.load(f'{filename}').convert_alpha()
@@ -66,9 +67,16 @@ class SpaceWar():
         # rect = pygame.Rect(0,0,self.screen.get_width(),self.screen.get_height())
         # img = DrawBg(self.screen,filename,rect)
         # self.img_bg = img
-        
+######################################################################################        
     def add_enemy(self,level,
-                  filename,width,height,hp=100,speed=1,delay = 1000,angle = 0,flip=False,
+                  filename,
+                  width,
+                  height,
+                  hp=100,
+                  speed=1,
+                  delay = 1000,
+                  angle = 0,
+                  flip=False,
                   
                   weapon_filename=None, 
                   weapon_width=60,
@@ -147,6 +155,7 @@ class SpaceWar():
         # enem = Enemy(self.screen,filename,width,height,hp,speed)
         # self.enemys[level][key] = enem
         
+######################################################################################
     def set_player(self,filename, hp = 500, x=-1,y=-1,width=100,height=90, angle = 0, flip = False):
         rect = pygame.Rect(x,y,width,height)
         
@@ -158,6 +167,7 @@ class SpaceWar():
         self.player = Player(self.screen,filename,rect,hp,angle, flip)
         return self.player
     
+######################################################################################
     def get_curr_level(self):
         if self.player is None:
             return 1
