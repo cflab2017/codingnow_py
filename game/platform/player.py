@@ -125,6 +125,7 @@ class Player():
         self.hp = 3
         self.jump_cnt = 0
         self.image = self.get_img(self.level)
+        self.MissionCompleted = False
         self.gametime = 0
         self.gametime_tick = pygame.time.get_ticks() + 10
         self.rect = self.image.get_rect()
