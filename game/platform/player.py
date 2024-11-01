@@ -11,12 +11,17 @@ class Player():
     jump_y = 0
     score = 0
     level = 1
+    level_real = 1
     gameover = False
     direction = 2
     hp = 3
     weapons = []
     imgs = {}
     jump_cnt = 0
+    gametime = 0
+    gametime_tick = 0
+    MissionCompleted = False
+    
     start_position = {1:{'x' : 20,'y':510}}
     def __init__(self,parent,screen:Surface,filename:str, width:int, height:int,flip: bool) -> None:
         self.parent = parent
@@ -37,6 +42,7 @@ class Player():
         self.msg_weapon_text = None
         self.msg_hp_text = None
         self.msg_jumpcnt_text = None
+        self.msg_gametime_text = None
         self.mfont20 = pygame.font.SysFont('malgungothic', 20)
         self.mfont30 = pygame.font.SysFont('malgungothic', 30)
         self.mfont40 = pygame.font.SysFont('malgungothic', 40)
@@ -113,12 +119,14 @@ class Player():
         
     def game_reset(self, reload_map):
         self.score = 0
-        self.level = 1        
+        self.level = 1      
+        self.level_real = 1  
         self.weapons.clear()
         self.hp = 3
         self.jump_cnt = 0
         self.image = self.get_img(self.level)
-        
+        self.gametime = 0
+        self.gametime_tick = pygame.time.get_ticks() + 10
         self.rect = self.image.get_rect()
         self.rect.x,self.rect.y = self.get_position(self.level) 
         self.rect_pre = self.rect.copy()
@@ -386,13 +394,60 @@ class Player():
                 self.rect_pre = self.rect.copy()
             
         if pygame.sprite.spritecollide(self, self.parent.group_exitDoor, False):
-            self.level += 1
-            
+            if self.level >= self.parent.lastExt:
+                self.MissionCompleted = True
+            else:
+                self.level += 1            
+                self.level = self.parent.map_change(self.level)
+                self.image = self.get_img(self.level)
+                self.rect.x,self.rect.y = self.get_position(self.level)      
+                self.rect_pre = self.rect.copy()
+                self.level_real = self.level
+                
+    def check_level_real(self):
+        if self.level_real != self.level:
+            self.level_real = self.level
             self.level = self.parent.map_change(self.level)
             self.image = self.get_img(self.level)
             self.rect.x,self.rect.y = self.get_position(self.level)      
             self.rect_pre = self.rect.copy()
-                
+            self.level_real = self.level
+            
+    def draw_message_success(self):
+        if self.MissionCompleted==False:
+            if pygame.time.get_ticks() > self.gametime_tick:
+                self.gametime_tick = pygame.time.get_ticks() + 10
+                self.gametime += 1
+            return False
+        
+        msg = f'Mission completed!!'
+        img = self.mfont50.render(msg, True, (192,0,0))
+        img.set_alpha(100)
+        rect = img.get_rect()
+        rect.centerx = self.screen.get_width()/2
+        rect.centery = self.screen.get_height()/2-100
+        self.screen.blit(img, rect)
+        
+        msg = f'재시작 (Click)'
+        img = self.mfont40.render(msg, True, (192,0,0))
+        img.set_alpha(100)
+        rect = img.get_rect()
+        rect.centerx = self.screen.get_width()/2
+        rect.centery = self.screen.get_height()/2
+        self.screen.blit(img, rect)
+        
+        if rect.collidepoint(pygame.mouse.get_pos()):
+            pygame.draw.rect(self.screen,(255,0,0),rect,2)
+            if pygame.mouse.get_pressed()[0]:
+                self.game_reset(True)
+                self.level = 1            
+                self.level = self.parent.map_change(self.level)
+                self.image = self.get_img(self.level)
+                self.rect.x,self.rect.y = self.get_position(self.level)      
+                self.rect_pre = self.rect.copy()
+            
+        return True
+        
     def draw_message(self, msg:str, color:tuple, x:int, y:int):
         msg = f'{msg}'
         img = self.mfont20.render(msg, True, color)
@@ -428,6 +483,12 @@ class Player():
         self.msg_jumpcnt_color = color
         self.msg_jumpcnt_text = text
         
+    def set_msg_gameTime(self, x=10,y=210, color = (0,0,0), text = '시간 : '):
+        self.msg_gametime_x = x
+        self.msg_gametime_y = y
+        self.msg_gametime_color = color
+        self.msg_gametime_text = text
+        
     def draw(self):
         if self.msg_score_text is not None:
             self.draw_message(f'{self.msg_score_text}{self.score}',
@@ -459,8 +520,18 @@ class Player():
                             x=self.msg_jumpcnt_x,
                             y=self.msg_jumpcnt_y)
             
+        if self.msg_gametime_text is not None:
+            self.draw_message(f'{self.msg_gametime_text}{self.gametime/100:.2f}초',
+                            self.msg_gametime_color, 
+                            x=self.msg_gametime_x,
+                            y=self.msg_gametime_y)
+            
         if self.game_over_process():
-            self.key_pressed()        
+            self.check_level_real()
+            if self.draw_message_success():
+                pass
+            else:
+                self.key_pressed()        
             self.check_img_dir()
             self.rect.y += self.jump_process()
             self.check_img_screen_limit()        

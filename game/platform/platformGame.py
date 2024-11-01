@@ -34,6 +34,7 @@ class PlatformGame():
     event_func_p = None
     bgimgs = {}
     image_sto = {}
+    lastExt = 0
     def __init__(self,screen:Surface) -> None:
         self.screen = screen
         self.player = None
@@ -173,6 +174,8 @@ class PlatformGame():
     def add_map_exit(self,level:int, filename:str, x:int, y:int):
         self.check_map_init(level,'exit')
         self.map_data[level]['exit'].append([filename,x,y])
+        if self.lastExt < level:
+            self.lastExt = level
 
     def add_bullet(self,filename):
         if filename not in self.image_sto:
