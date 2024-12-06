@@ -14,19 +14,26 @@ class Player():
 	
 	speed = 2
 	weapon_img = None
+	weapon_filename = None
 	weapon_damage = 0
 	weapon_speed = 0
 	weapon_delay = 0
 
 	weapon_def_img = None
+	weapon_def_filename = None
 	weapon_def_damage = 0
 	weapon_def_speed = 0
 	weapon_def_delay = 0
+	
+	weapon_list = {}
 	
 	group_weapon = pygame.sprite.Group()
 	group_items = pygame.sprite.Group()
 	
 	game_over = False
+	
+	images = []
+	
 	
 	def __init__(self,screen:Surface,filename, rect:pygame.Rect, hp = 100,angle=0, flip=False):
 		self.screen = screen
@@ -41,6 +48,7 @@ class Player():
 		if angle!=0:
 			img = pygame.transform.rotate(img,angle)
 			
+		self.images = [img]
 		self.image = img
 		self.rect = self.image.get_rect()
 		self.rect.x = rect.x
@@ -60,10 +68,46 @@ class Player():
 			'game_over':None,
 		}
 		
+		self.mfont = pygame.font.SysFont('malgungothic', 20)
+		
+		
+	def set_imgage(self, level,filename,width,height,angle=0, flip=False):
+		if level < 1:
+			return
+		
+		while True:
+			length = len(self.images)
+			if level <= length:
+				break
+			self.images.append(None)
+		print('setimg : ',self.images)
+		
+		img = pygame.image.load(f'{filename}').convert_alpha()
+		img = pygame.transform.scale(img, (width, height))
+		if flip:
+			img = pygame.transform.flip(img,True,False)
+			
+		if angle!=0:
+			img = pygame.transform.rotate(img,angle)
+			
+		self.images[level-1] = img
+		
+	def get_img(self, level):
+		try:
+			img = self.images[level-1]
+			if img is not None:
+				self.image = self.images[level-1]
+				rect = self.image.get_rect()
+				self.rect.width = rect.width
+				self.rect.height = rect.height
+		except Exception as ex:
+			pass
+		
 	def reset(self):
 		self.score=0
 		self.level = 1
 		self.level_pre = 1
+		self.get_img(self.level)
 		self.hp=self.hp_start
 		self.rect.x = self.sx
 		self.rect.y = self.sy
@@ -80,6 +124,7 @@ class Player():
 	def check_levelup(self):
 		if self.level > self.level_pre:
 			self.level_pre = self.level
+			self.get_img(self.level)
 			return True
 		
 		self.level_pre = self.level
@@ -108,15 +153,34 @@ class Player():
 			img = pygame.transform.flip(img,True,False)
 			
 		self.weapon_img = img
+		self.weapon_filename = filename
 		self.weapon_damage = damage
 		self.weapon_speed = speed*-1
 		self.weapon_delay = delay
 		
+		self.weapon_def_filename = self.weapon_filename
 		self.weapon_def_img = self.weapon_img
 		self.weapon_def_damage = self.weapon_damage
 		self.weapon_def_speed = self.weapon_speed
 		self.weapon_def_delay = self.weapon_delay
-	
+		
+		self.set_weapon_list(filename,img,damage,speed,delay)
+		
+	def set_weapon_list(self,filename,img,damage,speed,delay):
+		if filename not in self.weapon_list:
+			self.weapon_list[filename] = {
+				'filename':None,
+				'img':None,
+				'damage':0,
+				'speed':0,
+				'delay':0,
+				}
+		self.weapon_list[filename]['filename'] = filename
+		self.weapon_list[filename]['img'] = img
+		self.weapon_list[filename]['damage'] = damage
+		self.weapon_list[filename]['speed'] = speed
+		self.weapon_list[filename]['delay'] = delay
+			
 ######################################################################################
 	def key_pressed(self):
 		key_press = pygame.key.get_pressed()
@@ -160,7 +224,41 @@ class Player():
 				self.screen.blit(temp_surface, self.rect)
 			else:
 				self.shield_tick = 0
-            
+				
+	def draw_items(self):
+		rect_pre = None
+		key_press = pygame.key.get_pressed()
+		for i, weapon in enumerate(self.weapon_list):	
+			if key_press[pygame.K_1+i]:				
+				self.weapon_filename = self.weapon_list[weapon]['filename']
+				self.weapon_img = self.weapon_list[weapon]['img']
+				self.weapon_damage = self.weapon_list[weapon]['damage']
+				self.weapon_delay = self.weapon_list[weapon]['delay']
+				if(self.weapon_list[weapon]['speed']>0):
+					self.weapon_list[weapon]['speed'] *= -1
+				self.weapon_speed = self.weapon_list[weapon]['speed']
+				
+			msg = f' <<[{i+1}]'
+			img_font = self.mfont.render(msg, True, (192,0,192))
+			rect_font = img_font.get_rect()
+
+			img = self.weapon_list[weapon]['img']	
+			rect = img.get_rect()
+			rect_font.x = rect.right+2
+			rect_font.centery = rect.centery
+					
+			temp_surface = pygame.Surface((img.get_size()[0]+img_font.get_size()[0]+2,img.get_size()[1]))
+			
+			temp_surface.blit(img, (0, 0))
+			temp_surface.set_alpha(80)
+			temp_surface.blit(img_font, rect_font)
+			
+			rect.right = self.screen.get_width()-100
+			if rect_pre is not None:
+				rect.top = rect_pre.bottom+10
+			self.screen.blit(temp_surface,rect)
+			rect_pre = rect
+			
 	def draw(self,group_enemy:pygame.sprite.Group):
 		# pygame.draw.rect(self.screen,(255,255,255),rect,1)  
 		self.key_pressed()
@@ -179,9 +277,13 @@ class Player():
 		for item in items:
 			self.hp += item.hp
 			if item.weapon_img is not None:
-				self.weapon_img = item.weapon_img
-				self.weapon_damage = item.weapon_damage
-				self.weapon_delay = item.weapon_delay
+				# self.weapon_filename = item.weapon_filename
+				# self.weapon_img = item.weapon_img
+				# self.weapon_damage = item.weapon_damage
+				# self.weapon_delay = item.weapon_delay
+				# self.weapon_speed = item.weapon_speed
+				
+				self.set_weapon_list(item.weapon_filename,item.weapon_img,item.weapon_damage,item.weapon_speed,item.weapon_delay)
 			if self.snd_dic['item'] is not None:
 				self.snd_dic['item'].play()
 			# self.weapon_speed = item.speed*-1
@@ -226,9 +328,11 @@ class Player():
 										enemy.rect.centerx,
 										enemy.rect.centery,
 										enemy.i_hp,
+										enemy.i_weapon_filename,
 										enemy.i_weapon_img,
 										enemy.i_weapon_damage,
 										enemy.i_weapon_delay,
+										enemy.i_weapon_speed,
 				    						)
 						self.group_items.add(item)						
 					
@@ -248,7 +352,7 @@ class Player():
 					else:						
 						if self.snd_dic['shock'] is not None:
 							self.snd_dic['shock'].play()
-						
+		self.draw_items()
 		self.draw_shield()
 		self.group_items.update()
 		self.group_weapon.update()

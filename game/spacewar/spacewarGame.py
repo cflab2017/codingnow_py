@@ -95,6 +95,7 @@ class SpaceWar():
                   item_weapon_height=50,
                   item_weapon_damage = 0, 
                   item_weapon_delay = 0, 
+                  item_weapon_speed = 1, 
                   ):
         
         if level not in self.enemys:
@@ -132,7 +133,7 @@ class SpaceWar():
             #     img_i = pygame.transform.flip(img_i,True,False)  
         else:
             item_img_weapon = None
-
+        item_weapon_speed *= -1
         self.enemys[level][key] = {'img':img, 
                                    'hp':hp,
                                    'speed':speed,
@@ -145,9 +146,11 @@ class SpaceWar():
                                    'w_delay':weapon_dealy,
                                    
                                    'i_img':img_i, 
+                                   'i_weapon_filename':item_weapon_filename,
                                    'i_weapon_img':item_img_weapon,
                                    'i_weapon_damage':item_weapon_damage,
                                    'i_weapon_delay':item_weapon_delay,
+                                   'i_weapon_speed':item_weapon_speed,
                                    'i_hp':item_hp
                                    }
         
@@ -197,9 +200,11 @@ class SpaceWar():
                                 i_img=val['i_img'],
                                 i_hp=val['i_hp'],
                                 
+                                i_weapon_filename=val['i_weapon_filename'],
                                 i_weapon_img=val['i_weapon_img'],
                                 i_weapon_damage=val['i_weapon_damage'],
                                 i_weapon_delay=val['i_weapon_delay'],
+                                i_weapon_speed=val['i_weapon_speed'],
                                 )
                     img.rect.right = 1
                     img.rect.y = random.randint(img.rect.height, self.screen.get_height()-img.rect.height)

@@ -12,9 +12,11 @@ class Items(pygame.sprite.Sprite):
 						cy,
 						#   weapon_img = None,
 						hp=None, 
+						weapon_filename = None,
 						weapon_img = None,
 						weapon_damage= 0,
 						weapon_delay = 300,
+						weapon_speed = 1,
 						speed = 1
 			  ):
 		pygame.sprite.Sprite.__init__(self)
@@ -26,9 +28,11 @@ class Items(pygame.sprite.Sprite):
 		self.rect.centery = cy
 		self.speed = speed
 		self.hp = hp
+		self.weapon_filename = weapon_filename
 		self.weapon_img = weapon_img
 		self.weapon_damage = weapon_damage
 		self.weapon_delay = weapon_delay
+		self.weapon_speed = weapon_speed
 		self.update_tick = 0
 			
 	def draw_shield(self):

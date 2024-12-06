@@ -17,9 +17,12 @@ class Enemy(pygame.sprite.Sprite):
 											
 											i_img=None,
 											i_hp=0,
+											i_weapon_filename = None,
 											i_weapon_img = None,
 											i_weapon_damage=0,
 											i_weapon_delay=0,
+											i_weapon_speed=0,
+											
 											):
 		pygame.sprite.Sprite.__init__(self)
 		self.screen = screen
@@ -56,9 +59,11 @@ class Enemy(pygame.sprite.Sprite):
 		
 		self.i_img = i_img
 		self.i_hp = i_hp
+		self.i_weapon_filename = i_weapon_filename
 		self.i_weapon_img = i_weapon_img
 		self.i_weapon_damage = i_weapon_damage
 		self.i_weapon_delay = i_weapon_delay
+		self.i_weapon_speed = i_weapon_speed
 		
 		self.shield_tick = 0
 		self.shield_on = False
