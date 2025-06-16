@@ -97,7 +97,8 @@ class PlatformGame():
                         move_y = values[4]
                         self.group_monster.add(Monster(self.screen,img,x,y,move_x,move_y))
                     if key == 'exit':
-                        self.group_exitDoor.add(ExitDoor(self.screen,img,x,y))
+                        next_level = values[3] 
+                        self.group_exitDoor.add(ExitDoor(self.screen,img,x,y,next_level))
                     if key == 'lava':
                         self.group_lava.add(Lava(self.screen,img,x,y))
                     if key == 'weapon':
@@ -171,9 +172,9 @@ class PlatformGame():
         for i in range(num):
             self.map_data[level]['lava'].append([filename,x+30*i,y])
         
-    def add_map_exit(self,level:int, filename:str, x:int, y:int):
+    def add_map_exit(self,level:int, filename:str, x:int, y:int, next_level:int=-1):
         self.check_map_init(level,'exit')
-        self.map_data[level]['exit'].append([filename,x,y])
+        self.map_data[level]['exit'].append([filename,x,y,next_level])
         if self.lastExt < level:
             self.lastExt = level
 

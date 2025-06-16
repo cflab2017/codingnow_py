@@ -4,7 +4,7 @@ import pygame.sprite
 import pygame.transform
 
 class ExitDoor(pygame.sprite.Sprite):
-    def __init__(self,screen:Surface, img,x:int, y:int):
+    def __init__(self,screen:Surface, img,x:int, y:int, next_level:int):
         pygame.sprite.Sprite.__init__(self)
                     
         self.screen = screen        
@@ -14,6 +14,7 @@ class ExitDoor(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.next_level = next_level
         
         
     def update(self):

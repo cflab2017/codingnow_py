@@ -393,12 +393,20 @@ class Player():
                 self.image = self.get_img(self.level)
                 self.rect.x,self.rect.y = self.get_position(self.level)      
                 self.rect_pre = self.rect.copy()
-            
-        if pygame.sprite.spritecollide(self, self.parent.group_exitDoor, False):
+                
+        exit_door = pygame.sprite.spritecollide(self, self.parent.group_exitDoor, False)
+        if len(exit_door):
+            level = exit_door[0].next_level#맴점프
+            # print(f'Exit Door : {level}:{self.level}')
+            if level != -1:
+                self.level = level
+            else:
+                self.level += 1
+                   
             if self.level >= self.parent.lastExt:
                 self.MissionCompleted = True
             else:
-                self.level += 1            
+                # self.level += 1            
                 self.level = self.parent.map_change(self.level)
                 self.image = self.get_img(self.level)
                 self.rect.x,self.rect.y = self.get_position(self.level)      
