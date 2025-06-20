@@ -121,8 +121,8 @@ class Player():
         self.score = 0
         self.level = 1      
         self.level_real = 1  
-        self.weapons.clear()
         self.hp = 3
+        self.weapons.clear()
         self.jump_cnt = 0
         self.image = self.get_img(self.level)
         self.MissionCompleted = False
@@ -375,7 +375,7 @@ class Player():
             if self.hp <= 0:
                 self.gameover = True
             else:
-                self.level = self.parent.map_change(self.level)
+                # self.level = self.parent.map_change(self.level)
                 self.image = self.get_img(self.level)
                 self.rect.x,self.rect.y = self.get_position(self.level)      
                 self.rect_pre = self.rect.copy()
@@ -389,7 +389,7 @@ class Player():
             if self.hp <= 0:
                 self.gameover = True
             else:
-                self.level = self.parent.map_change(self.level)
+                # self.level = self.parent.map_change(self.level)
                 self.image = self.get_img(self.level)
                 self.rect.x,self.rect.y = self.get_position(self.level)      
                 self.rect_pre = self.rect.copy()
