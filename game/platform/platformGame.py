@@ -95,10 +95,14 @@ class PlatformGame():
                     if key == 'monster':
                         move_x = values[3] 
                         move_y = values[4]
-                        self.group_monster.add(Monster(self.screen,img,x,y,move_x,move_y))
+                        width = values[5]
+                        height = values[6]
+                        self.group_monster.add(Monster(self.screen,img,x,y,move_x,move_y,width,height))
                     if key == 'exit':
                         next_level = values[3] 
-                        self.group_exitDoor.add(ExitDoor(self.screen,img,x,y,next_level))
+                        width=values[4]
+                        height=values[5]
+                        self.group_exitDoor.add(ExitDoor(self.screen,img,x,y,next_level,width,height))
                     if key == 'lava':
                         self.group_lava.add(Lava(self.screen,img,x,y))
                     if key == 'weapon':
@@ -163,18 +167,18 @@ class PlatformGame():
         #     self.player.set_bullet_img(filename)
             
         
-    def add_map_mons(self,level:int, filename:str, x:int, y:int,move_x:int=1,move_y:int=0):
+    def add_map_mons(self,level:int, filename:str, x:int, y:int,move_x:int=1,move_y:int=0, width:int=40, height:int=40):
         self.check_map_init(level,'monster')
-        self.map_data[level]['monster'].append([filename,x,y,move_x,move_y])
+        self.map_data[level]['monster'].append([filename,x,y,move_x,move_y,width,height])
         
     def add_map_lava(self,level:int, filename:str, x:int, y:int, num:int):
         self.check_map_init(level,'lava')        
         for i in range(num):
             self.map_data[level]['lava'].append([filename,x+30*i,y])
         
-    def add_map_exit(self,level:int, filename:str, x:int, y:int, next_level:int=-1):
+    def add_map_exit(self,level:int, filename:str, x:int, y:int, next_level:int=-1, width:int=60, height:int=60):
         self.check_map_init(level,'exit')
-        self.map_data[level]['exit'].append([filename,x,y,next_level])
+        self.map_data[level]['exit'].append([filename,x,y,next_level,width,height])
         if self.lastExt < level:
             self.lastExt = level
 
