@@ -24,6 +24,7 @@ from codingnow.game.platform.coin import *
 from codingnow.game.platform.monster import *
 from codingnow.game.platform.lava import *
 from codingnow.game.platform.bullet import *
+from codingnow.game.platform.bullet_monster import *
 from codingnow.game.platform.exitdoor import *
 from codingnow.game.platform.weapon import *
 from codingnow.game.platform.hp import *
@@ -45,6 +46,7 @@ class PlatformGame():
         self.group_exitDoor = pygame.sprite.Group()
         self.group_weapon = pygame.sprite.Group()
         self.group_bullet = pygame.sprite.Group()
+        self.group_bulletMonster = pygame.sprite.Group()
         self.group_hp = pygame.sprite.Group()
         self.image_bg = None
         self.map_data = {}
@@ -53,10 +55,12 @@ class PlatformGame():
         self.msg_status_tick = 0
         self.copy_pressed = False
         # self.event_func_p = self.event_func()
+        self.mfont20 = pygame.font.SysFont('malgungothic', 20)
         self.mfont30 = pygame.font.SysFont('malgungothic', 30)    
 
     def map_change(self, level):
         self.group_bullet.empty()
+        self.group_bulletMonster.empty()
         self.group_coin.empty()
         self.group_monster.empty()
         self.group_block.empty()
@@ -97,7 +101,9 @@ class PlatformGame():
                         move_y = values[4]
                         width = values[5]
                         height = values[6]
-                        self.group_monster.add(Monster(self.screen,img,x,y,move_x,move_y,width,height))
+                        hp = values[7]
+                        bullet_interval = values[8]
+                        self.group_monster.add(Monster(self.screen,self.mfont20,img,x,y,move_x,move_y,width,height,hp,bullet_interval))
                     if key == 'exit':
                         next_level = values[3] 
                         width=values[4]
@@ -167,9 +173,15 @@ class PlatformGame():
         #     self.player.set_bullet_img(filename)
             
         
-    def add_map_mons(self,level:int, filename:str, x:int, y:int,move_x:int=1,move_y:int=0, width:int=40, height:int=40):
+    def add_map_mons(self,level:int, filename:str, 
+                     x:int, y:int,
+                     move_x:int=1,move_y:int=0, 
+                     width:int=40, height:int=40,
+                     hp:int=1,
+                     bullet_interval:int=-1
+                     ):
         self.check_map_init(level,'monster')
-        self.map_data[level]['monster'].append([filename,x,y,move_x,move_y,width,height])
+        self.map_data[level]['monster'].append([filename,x,y,move_x,move_y,width,height,hp,bullet_interval])
         
     def add_map_lava(self,level:int, filename:str, x:int, y:int, num:int):
         self.check_map_init(level,'lava')        
@@ -187,6 +199,12 @@ class PlatformGame():
             self.image_sto[filename] = pygame.image.load(f'{filename}').convert_alpha()
         img = self.image_sto[filename]
         self.group_bullet.add(Bullet(self.screen,img,self.player))
+        
+    def add_bulletMonster(self,img,monster:Monster):
+        # if filename not in self.image_sto:
+        #     self.image_sto[filename] = pygame.image.load(f'{filename}').convert_alpha()
+        # img = self.image_sto[filename]
+        self.group_bulletMonster.add(BulletMonster(self.screen,img,monster))
         
     def draw_mouse_point(self):
         if pygame.mouse.get_focused():
@@ -274,29 +292,39 @@ class PlatformGame():
             self.player.draw()
             
         for bullet in self.group_bullet:
-            if pygame.sprite.spritecollide(bullet, self.group_monster, True):
+            monster_hit = pygame.sprite.spritecollide(bullet, self.group_monster, False)
+            if len(monster_hit):
+                monster_hit[0].hp -= 1
+                if monster_hit[0].hp <= 0:
+                    monster_hit[0].kill()
                 bullet.kill()
                 self.player.score += 20
                 if self.player.snd_dic['monster'] is not None:
                     self.player.snd_dic['monster'].play()
-        
+                                        
+        for monster in self.group_monster:
+            if monster.check_bullet():
+                self.add_bulletMonster(monster.image, monster)
+            
+        self.group_exitDoor.update()
         self.group_block.update()
         self.group_coin.update()
         self.group_hp.update()
         self.group_weapon.update()
-        self.group_monster.update()
         self.group_lava.update()
         self.group_bullet.update()
-        self.group_exitDoor.update()
+        self.group_bulletMonster.update()
         
         self.group_exitDoor.draw(self.screen)
         self.group_block.draw(self.screen)
         self.group_coin.draw(self.screen)
         self.group_hp.draw(self.screen)
         self.group_weapon.draw(self.screen)
+        self.group_monster.update()
         self.group_monster.draw(self.screen)
         self.group_lava.draw(self.screen)
         self.group_bullet.draw(self.screen)
+        self.group_bulletMonster.draw(self.screen)
         if self.on_mouse_point:
             self.draw_mouse_point()
             

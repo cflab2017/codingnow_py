@@ -380,6 +380,20 @@ class Player():
                 self.rect.x,self.rect.y = self.get_position(self.level)      
                 self.rect_pre = self.rect.copy()
 
+        #몬스터 총알
+        if pygame.sprite.spritecollide(self, self.parent.group_bulletMonster, True):
+            self.hp -= 1
+            if self.snd_dic['game_over'] is not None:
+                self.snd_dic['game_over'].play()
+                # self.game_reset(True)
+            if self.hp <= 0:
+                self.gameover = True
+            else:
+                # self.level = self.parent.map_change(self.level)
+                self.image = self.get_img(self.level)
+                self.rect.x,self.rect.y = self.get_position(self.level)      
+                self.rect_pre = self.rect.copy()
+                
         # 용암 충돌확인? 
         if pygame.sprite.spritecollide(self, self.parent.group_lava, False):
             self.hp -= 1
