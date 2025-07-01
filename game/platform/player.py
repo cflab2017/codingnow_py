@@ -6,6 +6,7 @@ import random
 
 class Player():
     speed = 0
+    SPEED_DEF = 2
     JUMP_DEF = 15
     JUMP = 15
     jumped = False
@@ -24,6 +25,7 @@ class Player():
     MissionCompleted = False
     is_start = True
     jump_set_level = {}
+    speed_set_level = {}
     
     start_position = {1:{'x' : 20,'y':510}}
     def __init__(self,parent,screen:Surface,filename:str=None, width:int=0, height:int=0,flip: bool=False) -> None:
@@ -33,6 +35,7 @@ class Player():
         self.rect = None
         self.image = None
         self.JUMP = self.JUMP_DEF
+        self.speed = self.SPEED_DEF
         if filename is not None:
             self.image = self.set_img(self.level, filename,flip,width,height)
         self.img_idex = 0
@@ -91,6 +94,9 @@ class Player():
     def set_jump(self, level:int, jump:int):
         self.jump_set_level[level] = jump
         
+    def set_speed(self, level:int, speed:int):
+        self.speed_set_level[level] = speed
+        
     def set_img(self, level:int, filename:str, flip:bool=False, width:int=60, height:int=60):  
         
         self.imgs[level] = {
@@ -140,7 +146,14 @@ class Player():
         
         if self.level in self.jump_set_level:
             self.JUMP = self.jump_set_level[self.level]
+        else:
+            self.JUMP = self.JUMP_DEF
         
+        if self.level in self.speed_set_level:
+            self.speed = self.speed_set_level[self.level]
+        else:
+            self.speed = self.SPEED_DEF
+            
         self.gameover = False
         if reload_map:
             self.parent.map_change(self.level)
@@ -438,6 +451,9 @@ class Player():
             
             if self.level in self.jump_set_level:
                 self.JUMP = self.jump_set_level[self.level]
+                
+            if self.level in self.speed_set_level:
+                self.speed = self.speed_set_level[self.level]
                 
     def check_level_real(self):
         if self.level_real != self.level:
