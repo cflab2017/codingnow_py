@@ -36,7 +36,7 @@ class PlatformGame():
     bgimgs = {}
     image_sto = {}
     lastExt = 0
-    def __init__(self,screen:Surface) -> None:
+    def __init__(self,screen:Surface, on_mouse: bool=False) -> None:
         self.screen = screen
         self.player = None
         self.group_block = pygame.sprite.Group()
@@ -48,6 +48,7 @@ class PlatformGame():
         self.group_bullet = pygame.sprite.Group()
         self.group_bulletMonster = pygame.sprite.Group()
         self.group_hp = pygame.sprite.Group()
+        self.on_mouse_point = on_mouse
         self.image_bg = None
         self.map_data = {}
         self.msg_status=[]
@@ -129,12 +130,19 @@ class PlatformGame():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return False
             if self.event_func_p is not None:
                 self.event_func_p(event)
         return True
 
     def add_player(self,filename:str, flip:bool=False, width:int=60, height:int=60):
         self.player = Player(self,self.screen,filename,width,height,flip)
+        return self.player
+    
+    def create_player(self):
+        self.player = Player(self,self.screen)#,filename,width,height,flip)
         return self.player
     
     def add_bg_image(self, filename:str,level:int=1):        
@@ -285,7 +293,7 @@ class PlatformGame():
         if img is not None:
             self.screen.blit(img,(0,0))
             
-    def draw(self):        
+    def draw(self):            
         self.draw_bg_img()
         
         if self.player is not None:
@@ -293,6 +301,16 @@ class PlatformGame():
             
         for bullet in self.group_bullet:
             monster_hit = pygame.sprite.spritecollide(bullet, self.group_monster, False)
+            if len(monster_hit):
+                monster_hit[0].hp -= 1
+                if monster_hit[0].hp <= 0:
+                    monster_hit[0].kill()
+                bullet.kill()
+                self.player.score += 20
+                if self.player.snd_dic['monster'] is not None:
+                    self.player.snd_dic['monster'].play()
+                    
+            monster_hit = pygame.sprite.spritecollide(bullet, self.group_bulletMonster, False)
             if len(monster_hit):
                 monster_hit[0].hp -= 1
                 if monster_hit[0].hp <= 0:

@@ -6,6 +6,7 @@ import random
 
 class Player():
     speed = 0
+    JUMP_DEF = 15
     JUMP = 15
     jumped = False
     jump_y = 0
@@ -21,22 +22,24 @@ class Player():
     gametime = 0
     gametime_tick = 0
     MissionCompleted = False
+    is_start = True
+    jump_set_level = {}
     
     start_position = {1:{'x' : 20,'y':510}}
-    def __init__(self,parent,screen:Surface,filename:str, width:int, height:int,flip: bool) -> None:
+    def __init__(self,parent,screen:Surface,filename:str=None, width:int=0, height:int=0,flip: bool=False) -> None:
         self.parent = parent
         self.screen = screen
         self.img_gameover = None  
         self.rect = None
         self.image = None
-        self.image = self.set_img(self.level, filename,flip,width,height)
+        self.JUMP = self.JUMP_DEF
+        if filename is not None:
+            self.image = self.set_img(self.level, filename,flip,width,height)
         self.img_idex = 0
         
-        # self.image = self.get_img()
-        # self.rect = self.image.get_rect()
-        self.game_reset(True)
-        self.weapon_pressed = False
-        # self.image_bullet = None        
+        if filename is not None:
+            self.game_reset(True)
+        self.weapon_pressed = False      
         self.msg_level_text = None
         self.msg_score_text = None
         self.msg_weapon_text = None
@@ -84,6 +87,9 @@ class Player():
         rect.y = self.rect.y
         self.rect = rect
         return img
+    
+    def set_jump(self, level:int, jump:int):
+        self.jump_set_level[level] = jump
         
     def set_img(self, level:int, filename:str, flip:bool=False, width:int=60, height:int=60):  
         
@@ -131,6 +137,9 @@ class Player():
         self.rect = self.image.get_rect()
         self.rect.x,self.rect.y = self.get_position(self.level) 
         self.rect_pre = self.rect.copy()
+        
+        if self.level in self.jump_set_level:
+            self.JUMP = self.jump_set_level[self.level]
         
         self.gameover = False
         if reload_map:
@@ -410,14 +419,14 @@ class Player():
                 
         exit_door = pygame.sprite.spritecollide(self, self.parent.group_exitDoor, False)
         if len(exit_door):
-            level = exit_door[0].next_level#맴점프
+            level = exit_door[0].next_level#맵점프
             # print(f'Exit Door : {level}:{self.level}')
             if level != -1:
                 self.level = level
             else:
                 self.level += 1
                    
-            if self.level >= self.parent.lastExt:
+            if self.level > self.parent.lastExt:
                 self.MissionCompleted = True
             else:
                 # self.level += 1            
@@ -426,6 +435,9 @@ class Player():
                 self.rect.x,self.rect.y = self.get_position(self.level)      
                 self.rect_pre = self.rect.copy()
                 self.level_real = self.level
+            
+            if self.level in self.jump_set_level:
+                self.JUMP = self.jump_set_level[self.level]
                 
     def check_level_real(self):
         if self.level_real != self.level:
@@ -513,6 +525,10 @@ class Player():
         self.msg_gametime_text = text
         
     def draw(self):
+        if self.is_start:
+            self.is_start = False
+            self.game_reset(True)
+            
         if self.msg_score_text is not None:
             self.draw_message(f'{self.msg_score_text}{self.score}',
                             self.msg_score_color, 

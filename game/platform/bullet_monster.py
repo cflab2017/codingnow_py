@@ -17,6 +17,7 @@ class BulletMonster(pygame.sprite.Sprite):
         height = img.get_height()/2
         self.image_src = pygame.transform.scale(img,(width,height))
         self.image = self.image_src
+        self.hp = 1
         self.rect = self.image.get_rect()
         self.rect.centerx = monster.rect.centerx
         self.rect.centery = monster.rect.centery
