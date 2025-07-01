@@ -36,12 +36,12 @@ class Player():
         self.image = None
         self.JUMP = self.JUMP_DEF
         self.speed = self.SPEED_DEF
-        if filename is not None:
-            self.image = self.set_img(self.level, filename,flip,width,height)
+        # if filename is not None:
+        self.image = self.set_img(self.level, filename,flip,width,height)
         self.img_idex = 0
         
-        if filename is not None:
-            self.game_reset(True)
+        # if filename is not None:
+        self.game_reset(True)
         self.weapon_pressed = False      
         self.msg_level_text = None
         self.msg_score_text = None
@@ -97,6 +97,54 @@ class Player():
     def set_speed(self, level:int, speed:int):
         self.speed_set_level[level] = speed
         
+    def draw_persion(self, width:int=60, height:int=60): 
+        temp_surface = pygame.Surface((width, height), pygame.SRCALPHA)
+
+        # 기준 비율
+        head_ratio = 0.15   # 머리 반지름 비율 (세로 기준)
+        body_ratio = 0.35   # 몸통 길이 비율
+        arm_offset_ratio = 0.25  # 팔 길이 비율
+        leg_ratio = 0.4     # 다리 길이 비율
+
+        # 중심 좌표 계산
+        center_x = width // 2
+        top_y = int(height * 0.05)  # 머리 상단 위치
+
+        # 비율에 따른 실제 크기
+        head_radius = int(height * head_ratio)
+        body_length = int(height * body_ratio)
+        arm_length = int(height * arm_offset_ratio)
+        leg_length = int(height * leg_ratio)
+
+        # 색상
+        BLACK = (0, 0, 0)
+        SKIN = (255, 224, 189)
+
+        # 머리 중심 위치
+        head_center_y = top_y + head_radius
+        pygame.draw.circle(temp_surface, SKIN, (center_x, head_center_y), head_radius)
+
+        # 몸통
+        body_start = (center_x, head_center_y + head_radius)
+        body_end = (center_x, body_start[1] + body_length)
+        pygame.draw.line(temp_surface, BLACK, body_start, body_end, 2)
+
+        # 팔
+        arm_start = (center_x, body_start[1] + int(body_length * 0.2))
+        pygame.draw.line(temp_surface, BLACK, arm_start,
+                        (center_x - arm_length, arm_start[1] + arm_length), 2)
+        pygame.draw.line(temp_surface, BLACK, arm_start,
+                        (center_x + arm_length, arm_start[1] + arm_length), 2)
+
+        # 다리
+        leg_start = body_end
+        pygame.draw.line(temp_surface, BLACK, leg_start,
+                        (center_x - leg_length, leg_start[1] + leg_length), 2)
+        pygame.draw.line(temp_surface, BLACK, leg_start,
+                        (center_x + leg_length, leg_start[1] + leg_length), 2)
+
+        return temp_surface
+            
     def set_img(self, level:int, filename:str, flip:bool=False, width:int=60, height:int=60):  
         
         self.imgs[level] = {
@@ -104,7 +152,11 @@ class Player():
             'right':[],
             }
          
-        img = pygame.image.load(f'{filename}').convert_alpha()     
+        # print(f'Player image : {filename}')
+        if filename is None:
+            img = self.draw_persion(width, height)
+        else:          
+            img = pygame.image.load(f'{filename}').convert_alpha()     
         if flip:
             image_src_l = pygame.transform.scale(img,(width,height))
             image_src_r = pygame.transform.flip(image_src_l,True,False)

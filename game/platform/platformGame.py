@@ -141,8 +141,8 @@ class PlatformGame():
         self.player = Player(self,self.screen,filename,width,height,flip)
         return self.player
     
-    def create_player(self):
-        self.player = Player(self,self.screen)#,filename,width,height,flip)
+    def create_player(self,filename:str=None, flip:bool=False, width:int=60, height:int=60):
+        self.player = Player(self,self.screen,filename,width,height,flip)
         return self.player
     
     def add_bg_image(self, filename:str,level:int=1):        
