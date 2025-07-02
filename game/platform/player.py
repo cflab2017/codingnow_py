@@ -152,6 +152,7 @@ class Player():
             'right':[],
             }
          
+        filename = self.parent.get_folder_img(filename)
         # print(f'Player image : {filename}')
         if filename is None:
             img = self.draw_persion(width, height)
@@ -178,6 +179,7 @@ class Player():
         return image_src_r
         
     def set_gameover_image(self,filename):
+        filename = self.parent.get_folder_img(filename)
         img = pygame.image.load(f'{filename}').convert_alpha()
         self.img_gameover = pygame.transform.scale(img,(self.rect.width,self.rect.height))
         
@@ -215,18 +217,23 @@ class Player():
     #     self.image_bullet = pygame.transform.scale(img,(40,30))
         
     def set_snd_weapon(self,filename):
+        filename = self.parent.get_folder_snd(filename)
         self.snd_dic['weapon'] = pygame.mixer.Sound(filename)
         
     def set_snd_coin(self,filename):
+        filename = self.parent.get_folder_snd(filename)
         self.snd_dic['coin'] = pygame.mixer.Sound(filename)
         
     def set_snd_jump(self,filename):
+        filename = self.parent.get_folder_snd(filename)
         self.snd_dic['jump'] = pygame.mixer.Sound(filename)
         
     def set_snd_game_over(self,filename):
+        filename = self.parent.get_folder_snd(filename)
         self.snd_dic['game_over'] = pygame.mixer.Sound(filename)
         
     def set_snd_monster(self,filename):
+        filename = self.parent.get_folder_snd(filename)
         self.snd_dic['monster'] = pygame.mixer.Sound(filename)
     
     def rotate(self, angle):

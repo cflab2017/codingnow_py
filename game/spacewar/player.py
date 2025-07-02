@@ -37,12 +37,13 @@ class Player():
 	score_set_level = {}
 	speed_set_level = {}
 	
-	
-	def __init__(self,screen:Surface,filename, rect:pygame.Rect, hp = 100,angle=0, flip=False):
+	def __init__(self,parent, screen:Surface,filename, rect:pygame.Rect, hp = 100,angle=0, flip=False):
+		self.parent = parent
 		self.screen = screen
 		self.hp = hp
 		self.hp_start = hp
 		
+		filename = self.parent.get_folder_img(filename)
 		if filename is None:
 			img = self.draw_airplane(rect.width, rect.height)
 			angle = 90
@@ -135,8 +136,8 @@ class Player():
 			if level <= length:
 				break
 			self.images.append(None)
-		print('setimg : ',self.images)
-		
+		# print('setimg : ',self.images)
+		filename = self.parent.get_folder_img(filename)
 		if filename is None:
 			img = self.draw_airplane(width, height)
 			angle = 90
@@ -191,22 +192,28 @@ class Player():
 		return False
 	
 	def set_snd_shoot(self,filename):
+		filename = self.parent.get_folder_snd(filename)
 		self.snd_dic['shoot'] = pygame.mixer.Sound(filename)
 		
 	def set_snd_item(self,filename):
+		filename = self.parent.get_folder_snd(filename)
 		self.snd_dic['item'] = pygame.mixer.Sound(filename)
 		
 	def set_snd_hit(self,filename):
+		filename = self.parent.get_folder_snd(filename)
 		self.snd_dic['hit'] = pygame.mixer.Sound(filename)
 		
 	def set_snd_game_over(self,filename):
+		filename = self.parent.get_folder_snd(filename)
 		self.snd_dic['game_over'] = pygame.mixer.Sound(filename)
 		
 	def set_snd_shock(self,filename):
+		filename = self.parent.get_folder_snd(filename)
 		self.snd_dic['shock'] = pygame.mixer.Sound(filename)
 		
 ######################################################################################
 	def set_weapon(self, filename, width, height, damage,speed,delay, flip=False):
+		filename = self.parent.get_folder_img(filename)
 		img = pygame.image.load(f'{filename}').convert_alpha()
 		img = pygame.transform.scale(img, (width, height))
 		if flip:
@@ -227,6 +234,7 @@ class Player():
 		self.set_weapon_list(filename,img,damage,speed,delay)
 		
 	def set_weapon_list(self,filename,img,damage,speed,delay):
+		filename = self.parent.get_folder_img(filename)
 		if filename not in self.weapon_list:
 			self.weapon_list[filename] = {
 				'filename':None,

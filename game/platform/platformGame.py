@@ -36,6 +36,11 @@ class PlatformGame():
     bgimgs = {}
     image_sto = {}
     lastExt = 0
+    path = {
+        'img' : None,
+        'snd' : None,
+        }
+    
     def __init__(self,screen:Surface, on_mouse: bool=False) -> None:
         self.screen = screen
         self.player = None
@@ -58,7 +63,31 @@ class PlatformGame():
         # self.event_func_p = self.event_func()
         self.mfont20 = pygame.font.SysFont('malgungothic', 20)
         self.mfont30 = pygame.font.SysFont('malgungothic', 30)    
+        
+    def set_folder(self, images:str=None, sounds:str=None):
+        self.path['img'] = images
+        self.path['snd'] = sounds
+        
+    def get_folder_img(self, filename):
+        
+        if filename is None:
+            return None
+        
+        if self.path['img'] is None:
+            return filename
 
+        return f"./{self.path['img']}/{filename}"
+    
+    def get_folder_snd(self, filename):
+        
+        if filename is None:
+            return None
+        
+        if self.path['snd'] is None:
+            return filename
+
+        return f"./{self.path['snd']}/{filename}"
+    
     def map_change(self, level):
         self.group_bullet.empty()
         self.group_bulletMonster.empty()
@@ -138,14 +167,17 @@ class PlatformGame():
         return True
 
     def add_player(self,filename:str, flip:bool=False, width:int=60, height:int=60):
+        filename = self.get_folder_img(filename)
         self.player = Player(self,self.screen,filename,width,height,flip)
         return self.player
     
     def create_player(self,filename:str=None, flip:bool=False, width:int=60, height:int=60):
+        filename = self.get_folder_img(filename)
         self.player = Player(self,self.screen,filename,width,height,flip)
         return self.player
     
-    def add_bg_image(self, filename:str,level:int=1):        
+    def add_bg_image(self, filename:str,level:int=1):  
+        filename = self.get_folder_img(filename)      
         img = pygame.image.load(f'{filename}').convert_alpha()
         image_bg = pygame.transform.scale(img,(self.screen.get_width(),self.screen.get_height()))
         if (level != 1) and (1 not in self.bgimgs):
@@ -161,20 +193,24 @@ class PlatformGame():
             self.map_data[level].update({key:[]})
         
     def add_map_block(self,level:int, filename:str, x:int, y:int,move_x:int=0,move_y:int=0, num:int=1):
+        filename = self.get_folder_img(filename)
         self.check_map_init(level,'block')            
         # self.map_data[level]['block'].append([filename,x,y,move_x,move_y])
         for i in range(num):
             self.map_data[level]['block'].append([filename,x+60*i,y,move_x,move_y])
         
     def add_map_coin(self,level:int, filename:str, x:int, y:int):
+        filename = self.get_folder_img(filename)
         self.check_map_init(level,'coin')            
         self.map_data[level]['coin'].append([filename,x,y])        
                 
     def add_map_hp(self,level:int, filename:str, x:int, y:int):
+        filename = self.get_folder_img(filename)
         self.check_map_init(level,'hp')            
         self.map_data[level]['hp'].append([filename,x,y])    
         
     def add_map_weapon(self,level:int, filename:str, x:int, y:int):
+        filename = self.get_folder_img(filename)
         self.check_map_init(level,'weapon')            
         self.map_data[level]['weapon'].append([filename,x,y])  
         # if self.player is not None:
@@ -188,21 +224,27 @@ class PlatformGame():
                      hp:int=1,
                      bullet_interval:int=-1
                      ):
+        filename = self.get_folder_img(filename)
         self.check_map_init(level,'monster')
         self.map_data[level]['monster'].append([filename,x,y,move_x,move_y,width,height,hp,bullet_interval])
         
     def add_map_lava(self,level:int, filename:str, x:int, y:int, num:int):
+        filename = self.get_folder_img(filename)
         self.check_map_init(level,'lava')        
         for i in range(num):
             self.map_data[level]['lava'].append([filename,x+30*i,y])
         
     def add_map_exit(self,level:int, filename:str, x:int, y:int, next_level:int=-1, width:int=60, height:int=60):
+        filename = self.get_folder_img(filename)
         self.check_map_init(level,'exit')
         self.map_data[level]['exit'].append([filename,x,y,next_level,width,height])
         if self.lastExt < level:
             self.lastExt = level
 
     def add_bullet(self,filename):
+        # print(filename)
+        # filename = self.get_folder_img(filename)
+        
         if filename not in self.image_sto:
             self.image_sto[filename] = pygame.image.load(f'{filename}').convert_alpha()
         img = self.image_sto[filename]

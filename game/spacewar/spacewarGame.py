@@ -22,8 +22,12 @@ class SpaceWar():
     enemys = {}
     enemy_gen_time = 0
     backgrounds = {}
-    images_dict = {}
-    
+    images_dict = {}    
+	
+    path = {
+        'img' : None,
+        'snd' : None,
+        }
     
     def __init__(self,screen:Surface) -> None:
         self.screen = screen
@@ -32,7 +36,31 @@ class SpaceWar():
         self.message = DrawMsg(self.screen)
         self.drawbg = DrawBg(self.screen)
         pass
-    
+
+    def set_folder(self, images:str=None, sounds:str=None):
+        self.path['img'] = images
+        self.path['snd'] = sounds
+        
+    def get_folder_img(self, filename):
+        
+        if filename is None:
+            return None
+        
+        if self.path['img'] is None:
+            return filename
+
+        return f"./{self.path['img']}/{filename}"
+
+    def get_folder_snd(self, filename):
+        
+        if filename is None:
+            return None
+        
+        if self.path['snd'] is None:
+            return filename
+
+        return f"./{self.path['snd']}/{filename}"
+        
     def event_func(event:Event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
@@ -64,7 +92,7 @@ class SpaceWar():
           
 ######################################################################################
     def add_bg_image(self, level, filename):
-        
+        filename = self.get_folder_img(filename)
         img = pygame.image.load(f'{filename}').convert_alpha()
         img = pygame.transform.scale(img, (self.screen.get_width(), self.screen.get_height()))
         self.backgrounds[level] = img
@@ -108,6 +136,7 @@ class SpaceWar():
         # print(self.enemys)
         key = len(self.enemys[level])
         
+        filename = self.get_folder_img(filename)
         if filename in self.images_dict:
             img = self.images_dict[filename]
         else:            
@@ -120,6 +149,7 @@ class SpaceWar():
         if angle!=0:
             img = pygame.transform.rotate(img,angle)
             
+        weapon_filename = self.get_folder_img(weapon_filename)
         if weapon_filename is not None:
             if weapon_filename in self.images_dict:
                 img_w = self.images_dict[weapon_filename]
@@ -133,6 +163,7 @@ class SpaceWar():
         else:
             img_w = None
             
+        item_filename = self.get_folder_img(item_filename)
         if item_filename is not None:
             
             if item_filename in self.images_dict:
@@ -147,6 +178,7 @@ class SpaceWar():
         else:
             img_i = None
             
+        item_weapon_filename = self.get_folder_img(item_weapon_filename)
         if item_weapon_filename is not None:
             
             if item_weapon_filename in self.images_dict:
@@ -187,6 +219,8 @@ class SpaceWar():
         
 ######################################################################################
     def create_player(self,filename=None, hp = 1000, x=-1,y=-1,width=60,height=50, angle = 0, flip = False):
+        
+        filename = self.get_folder_img(filename)
         rect = pygame.Rect(x,y,width,height)
         
         if x==-1:
@@ -194,10 +228,11 @@ class SpaceWar():
         if y == -1:
             rect.centery = self.screen.get_height()/2
             
-        self.player = Player(self.screen,filename,rect,hp,angle, flip)
+        self.player = Player(self,self.screen,filename,rect,hp,angle, flip)
         return self.player
     
     def set_player(self,filename, hp = 500, x=-1,y=-1,width=100,height=90, angle = 0, flip = False):
+        filename = self.get_folder_img(filename)
         rect = pygame.Rect(x,y,width,height)
         
         if x==-1:
@@ -205,7 +240,7 @@ class SpaceWar():
         if y == -1:
             rect.centery = self.screen.get_height()/2
             
-        self.player = Player(self.screen,filename,rect,hp,angle, flip)
+        self.player = Player(self,self.screen,filename,rect,hp,angle, flip)
         return self.player
     
 ######################################################################################
