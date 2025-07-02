@@ -22,6 +22,8 @@ class SpaceWar():
     enemys = {}
     enemy_gen_time = 0
     backgrounds = {}
+    images_dict = {}
+    
     
     def __init__(self,screen:Surface) -> None:
         self.screen = screen
@@ -41,6 +43,9 @@ class SpaceWar():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return False
             if self.event_func_p is not None:
                 self.event_func_p(event)
         return True
@@ -103,7 +108,12 @@ class SpaceWar():
         # print(self.enemys)
         key = len(self.enemys[level])
         
-        img = pygame.image.load(f'{filename}').convert_alpha()
+        if filename in self.images_dict:
+            img = self.images_dict[filename]
+        else:            
+            img = pygame.image.load(f'{filename}').convert_alpha()
+            self.images_dict[filename] = img
+            
         img = pygame.transform.scale(img, (width, height))
         if flip:
             img = pygame.transform.flip(img,True,False)            
@@ -111,7 +121,12 @@ class SpaceWar():
             img = pygame.transform.rotate(img,angle)
             
         if weapon_filename is not None:
-            img_w = pygame.image.load(f'{weapon_filename}').convert_alpha()
+            if weapon_filename in self.images_dict:
+                img_w = self.images_dict[weapon_filename]
+            else:            
+                img_w = pygame.image.load(f'{weapon_filename}').convert_alpha()
+                self.images_dict[weapon_filename] = img_w
+                
             img_w = pygame.transform.scale(img_w, (weapon_width, weapon_height))
             if weapon_flip:
                 img_w = pygame.transform.flip(img_w,True,False)  
@@ -119,7 +134,13 @@ class SpaceWar():
             img_w = None
             
         if item_filename is not None:
-            img_i = pygame.image.load(f'{item_filename}').convert_alpha()
+            
+            if item_filename in self.images_dict:
+                img_i = self.images_dict[item_filename]
+            else:            
+                img_i = pygame.image.load(f'{item_filename}').convert_alpha()
+                self.images_dict[item_filename] = img_i
+                
             img_i = pygame.transform.scale(img_i, (item_width, item_height))
             # if item_flip:
             #     img_i = pygame.transform.flip(img_i,True,False)  
@@ -127,7 +148,13 @@ class SpaceWar():
             img_i = None
             
         if item_weapon_filename is not None:
-            item_img_weapon = pygame.image.load(f'{item_weapon_filename}').convert_alpha()
+            
+            if item_weapon_filename in self.images_dict:
+                item_img_weapon = self.images_dict[item_weapon_filename]
+            else:            
+                item_img_weapon = pygame.image.load(f'{item_weapon_filename}').convert_alpha()
+                self.images_dict[item_weapon_filename] = item_img_weapon
+                
             item_img_weapon = pygame.transform.scale(item_img_weapon, (item_weapon_width, item_weapon_height))
             # if item_flip:
             #     img_i = pygame.transform.flip(img_i,True,False)  
@@ -159,6 +186,17 @@ class SpaceWar():
         # self.enemys[level][key] = enem
         
 ######################################################################################
+    def create_player(self,filename=None, hp = 1000, x=-1,y=-1,width=60,height=50, angle = 0, flip = False):
+        rect = pygame.Rect(x,y,width,height)
+        
+        if x==-1:
+            rect.right = self.screen.get_width()-width
+        if y == -1:
+            rect.centery = self.screen.get_height()/2
+            
+        self.player = Player(self.screen,filename,rect,hp,angle, flip)
+        return self.player
+    
     def set_player(self,filename, hp = 500, x=-1,y=-1,width=100,height=90, angle = 0, flip = False):
         rect = pygame.Rect(x,y,width,height)
         

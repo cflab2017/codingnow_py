@@ -319,7 +319,10 @@ class PlatformGame():
                 self.player.score += 20
                 if self.player.snd_dic['monster'] is not None:
                     self.player.snd_dic['monster'].play()
-                                        
+                    
+        for block in self.group_block:
+            pygame.sprite.spritecollide(block, self.group_bulletMonster, True)
+            
         for monster in self.group_monster:
             if monster.check_bullet():
                 self.add_bulletMonster(monster.image, monster)

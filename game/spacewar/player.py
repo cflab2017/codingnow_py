@@ -12,6 +12,7 @@ class Player():
 	level = 1
 	level_pre = 1
 	
+	is_start = True
 	speed = 2
 	weapon_img = None
 	weapon_filename = None
@@ -33,15 +34,22 @@ class Player():
 	game_over = False
 	
 	images = []
+	score_set_level = {}
+	speed_set_level = {}
 	
 	
 	def __init__(self,screen:Surface,filename, rect:pygame.Rect, hp = 100,angle=0, flip=False):
 		self.screen = screen
-		self.filename = filename
 		self.hp = hp
 		self.hp_start = hp
-		img = pygame.image.load(f'{filename}').convert_alpha()
-		img = pygame.transform.scale(img, (rect.width, rect.height))
+		
+		if filename is None:
+			img = self.draw_airplane(rect.width, rect.height)
+			angle = 90
+		else:
+			img = pygame.image.load(f'{filename}').convert_alpha()
+			img = pygame.transform.scale(img, (rect.width, rect.height))
+		
 		if flip:
 			img = pygame.transform.flip(img,True,False)
 			
@@ -70,7 +78,54 @@ class Player():
 		
 		self.mfont = pygame.font.SysFont('malgungothic', 20)
 		
+	def set_level_next(self, level:int, score:int):
+		self.score_set_level[level] = score
 		
+	def set_level_speed(self, level:int, speed:int):
+		self.speed_set_level[level] = speed
+				
+	def draw_airplane(self, width: int = 100, height: int = 100):
+		temp_surface = pygame.Surface((width, height), pygame.SRCALPHA)
+
+		# 색상
+		GRAY = (180, 180, 180)
+		DARK_GRAY = (80, 80, 80)
+		BLUE = (0, 100, 255)
+
+		# 중심 기준점
+		center_x = width // 2
+		center_y = height // 2
+
+		# 동체 (몸통): 중앙 세로 사각형
+		body_width = width * 0.2
+		body_height = height * 0.8
+		body_rect = pygame.Rect(center_x - body_width // 2, center_y - body_height // 2, body_width, body_height)
+		pygame.draw.rect(temp_surface, GRAY, body_rect)
+
+		# 앞부분 (기수): 삼각형
+		nose_tip = (center_x, center_y - body_height // 2 - height * 0.1)
+		nose_left = (center_x - body_width // 2, center_y - body_height // 2)
+		nose_right = (center_x + body_width // 2, center_y - body_height // 2)
+		pygame.draw.polygon(temp_surface, DARK_GRAY, [nose_tip, nose_left, nose_right])
+
+		# 날개: 양쪽으로 뻗는 삼각형
+		wing_left = [(center_x - body_width // 2, center_y),
+					(center_x - width * 0.45, center_y + height * 0.1),
+					(center_x - body_width // 2, center_y + height * 0.2)]
+		wing_right = [(center_x + body_width // 2, center_y),
+					(center_x + width * 0.45, center_y + height * 0.1),
+					(center_x + body_width // 2, center_y + height * 0.2)]
+		pygame.draw.polygon(temp_surface, BLUE, wing_left)
+		pygame.draw.polygon(temp_surface, BLUE, wing_right)
+
+		# 꼬리날개: 상단 삼각형
+		tail_center = (center_x, center_y + body_height // 2)
+		tail_left = (center_x - width * 0.1, tail_center[1] + height * 0.15)
+		tail_right = (center_x + width * 0.1, tail_center[1] + height * 0.15)
+		pygame.draw.polygon(temp_surface, DARK_GRAY, [tail_center, tail_left, tail_right])
+
+		return temp_surface
+
 	def set_imgage(self, level,filename,width,height,angle=0, flip=False):
 		if level < 1:
 			return
@@ -82,8 +137,13 @@ class Player():
 			self.images.append(None)
 		print('setimg : ',self.images)
 		
-		img = pygame.image.load(f'{filename}').convert_alpha()
-		img = pygame.transform.scale(img, (width, height))
+		if filename is None:
+			img = self.draw_airplane(width, height)
+			angle = 90
+		else:
+			img = pygame.image.load(f'{filename}').convert_alpha()
+			img = pygame.transform.scale(img, (width, height))
+			
 		if flip:
 			img = pygame.transform.flip(img,True,False)
 			
@@ -260,6 +320,9 @@ class Player():
 			rect_pre = rect
 			
 	def draw(self,group_enemy:pygame.sprite.Group):
+		if self.is_start:
+			self.is_start = False
+			self.reset()
 		# pygame.draw.rect(self.screen,(255,255,255),rect,1)  
 		self.key_pressed()
 		
@@ -361,3 +424,9 @@ class Player():
 		self.group_weapon.draw(self.screen)
 		self.screen.blit(self.image,self.rect)
 		
+		if self.level in self.score_set_level:
+			if self.score >= self.score_set_level[self.level]:
+				self.level += 1
+				
+		if self.level in self.speed_set_level:
+			self.speed = self.speed_set_level[self.level]
