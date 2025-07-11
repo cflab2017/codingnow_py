@@ -6,7 +6,6 @@ except:
     os.system('pip install pygame')
     import pygame
 
-import os
 try:
     import win32api
 except:
@@ -17,6 +16,21 @@ import win32con
 import win32gui
 import ctypes
 import math
+
+try:
+    from pystray import Icon, MenuItem, Menu
+except:
+    os.system('pip install pystray')
+    from pystray import Icon, MenuItem, Menu
+
+try:
+    from PIL import Image, ImageDraw
+except:
+    os.system('pip install Pillow')
+    from PIL import Image, ImageDraw    
+    
+import threading
+
 
 from pygame.event import Event
 # RECT 구조체 정의
@@ -34,6 +48,7 @@ class MousePointer:
     mouse_click = {'left' : False, 'right' : False, 'middle' : False}
     face_expressions = ["smile", "wink", "neutral", "sad"]
     event_func_p = None
+    is_run = True
     
     def __init__(self, filename:str=None, screen_width:int=None, screen_height:int=None,size:int=50):
         
@@ -47,6 +62,8 @@ class MousePointer:
         self.hwnd = pygame.display.get_wm_info()['window']
         self.set_background_Alpha(self.hwnd)
         self.set_always_on_top(self.hwnd)
+        self.hide_window(self.hwnd)
+        # win32gui.ShowWindow(self.hwnd, win32con.SW_HIDE)
 
         
         self.cursor_size = size
@@ -155,7 +172,27 @@ class MousePointer:
         
     def RGB(self,r, g, b):
         return r | (g << 8) | (b << 16)
+    # 현재 실행 중인 프로세스의 핸들 가져오기
     
+    def hide_window(self,hwnd):
+        # 창 스타일 변경: 작업표시줄에서 숨기기
+        GWL_EXSTYLE = -20
+        WS_EX_TOOLWINDOW = 0x00000080
+        WS_EX_APPWINDOW = 0x00040000
+
+        # 기존 스타일 가져오기
+        ex_style = win32gui.GetWindowLong(hwnd, GWL_EXSTYLE)
+
+        # APPWINDOW 제거하고 TOOLWINDOW 추가
+        ex_style = ex_style & ~WS_EX_APPWINDOW
+        ex_style = ex_style | WS_EX_TOOLWINDOW
+
+        # 스타일 적용
+        win32gui.SetWindowLong(hwnd, GWL_EXSTYLE, ex_style)
+
+        # 창 위치 재설정 (스타일 변경 후 필요)
+        win32gui.ShowWindow(hwnd, win32con.SW_SHOW)
+        
 # 좌표 얻기 함수
     def get_window_position(self,hwnd):
         rect = RECT()
@@ -210,18 +247,33 @@ class MousePointer:
                     return False
             if self.event_func_p is not None:
                 self.event_func_p(event)
+                
+        if self.is_run==False:
+            return False
         return True
     
-    def draw(self):   
-        self.screen.fill(self.TRANSPARENT_COLOR)
-        self.get_cursor_position(self.hwnd, self.cursor_rect)
-        self.get_mouse_click()
-        
-        self.screen.blit(self.cursor_image, self.cursor_rect)
-        pygame.display.update()
-        self.clock.tick(60)
-        
+    # 아이콘 이미지를 생성하는 함수
+    def create_image(self):
+        # 64x64 사이즈의 이미지 생성
+        image = Image.new('RGB', (64, 64), color=(255, 255, 255))
+        draw = ImageDraw.Draw(image)
+        draw.rectangle((16, 16, 48, 48), fill=(0, 0, 0))
+        return image
+
+    # 종료 함수
+    def on_quit(self,icon, item):
+        self.is_run = False
+        icon.stop()
+
+    # 트레이 아이콘을 실행하는 함수
+    def setup_tray_icon(self):
+        icon = Icon("Test Tray", self.create_image(), menu=Menu(
+            MenuItem("종료", self.on_quit)
+        ))
+        icon.run()
+     
     def run(self):
+        threading.Thread(target=self.setup_tray_icon, daemon=True).start()
         while self.check_quit():
             # 완전 투명하게 배경 지우기
             self.screen.fill(self.TRANSPARENT_COLOR)
