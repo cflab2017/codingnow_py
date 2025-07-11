@@ -17,6 +17,16 @@ try:
 except:
     os.system('pip install clipboard')
     import clipboard
+    
+try:
+    import win32api
+except:
+    os.system('pip install pywin32')
+    import win32api
+    
+import win32con
+import win32gui
+import ctypes
 
 from codingnow.game.platform.player import *
 from codingnow.game.platform.block import *
@@ -30,7 +40,16 @@ from codingnow.game.platform.teleport import *
 from codingnow.game.platform.weapon import *
 from codingnow.game.platform.hp import *
 
+# RECT 구조체 정의
+class RECT(ctypes.Structure):
+    _fields_ = [("left", ctypes.c_long),
+                ("top", ctypes.c_long),
+                ("right", ctypes.c_long),
+                ("bottom", ctypes.c_long)]
+    
 class PlatformGame():
+    # TRANSPARENT_COLOR = (255, 0, 128) #
+    TRANSPARENT_COLOR = (0, 0, 0) #
     player:Player = None
     on_mouse_point = False
     event_func_p = None
@@ -42,8 +61,15 @@ class PlatformGame():
         'snd' : None,
         }
     
-    def __init__(self,screen:Surface, on_mouse: bool=False) -> None:
-        self.screen = screen
+    def __init__(self,screen:Surface, on_mouse: bool=False, on_alpha: bool=False, color_alpha :tuple=(0,0,0)) -> None:
+        self.on_alpha = on_alpha
+        if self.on_alpha:            
+            self.TRANSPARENT_COLOR = color_alpha
+            self.hwnd = pygame.display.get_wm_info()['window']
+            self.set_background_Alpha(self.hwnd)
+            self.screen = pygame.display.set_mode((screen.get_width(), screen.get_height()), pygame.SRCALPHA| pygame.NOFRAME)
+        else:
+            self.screen = screen
         self.player = None
         self.group_block = pygame.sprite.Group()
         self.group_coin = pygame.sprite.Group()
@@ -65,6 +91,17 @@ class PlatformGame():
         # self.event_func_p = self.event_func()
         self.mfont20 = pygame.font.SysFont('malgungothic', 20)
         self.mfont30 = pygame.font.SysFont('malgungothic', 30)    
+        
+            
+    def RGB(self,r, g, b):
+        return r | (g << 8) | (b << 16)
+    
+    def set_background_Alpha(self, hwnd):
+        win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, win32gui.GetWindowLong(
+                       hwnd, win32con.GWL_EXSTYLE) | win32con.WS_EX_LAYERED)
+
+        # win32gui.SetLayeredWindowAttributes(hwnd, win32api.RGB(255,0,128), 0, win32con.LWA_COLORKEY)
+        win32gui.SetLayeredWindowAttributes(hwnd, self.RGB(*self.TRANSPARENT_COLOR), 0, win32con.LWA_COLORKEY)
         
     def set_folder(self, images:str=None, sounds:str=None):
         self.path['img'] = images
@@ -337,6 +374,10 @@ class PlatformGame():
                 self.screen.blit(img, rect)
                 
     def draw_bg_img(self):
+        if self.on_alpha:    
+            self.screen.fill(self.TRANSPARENT_COLOR)
+            return
+        
         img = None
         if self.player is not None:
             if self.player.level in self.bgimgs:
@@ -404,7 +445,7 @@ class PlatformGame():
         self.group_lava.draw(self.screen)
         self.group_bullet.draw(self.screen)
         self.group_bulletMonster.draw(self.screen)
-        if self.on_mouse_point:
+        if self.on_mouse_point and self.on_alpha==False:
             self.draw_mouse_point()
             
         self.draw_status_msg()

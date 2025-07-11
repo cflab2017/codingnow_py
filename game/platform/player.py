@@ -49,7 +49,7 @@ class Player():
         self.msg_hp_text = None
         self.msg_jumpcnt_text = None
         self.msg_gametime_text = None
-        self.mfont20 = pygame.font.SysFont('malgungothic', 20)
+        self.mfont20 = pygame.font.SysFont('malgungothic', 16)
         self.mfont30 = pygame.font.SysFont('malgungothic', 30)
         self.mfont40 = pygame.font.SysFont('malgungothic', 40)
         self.mfont50 = pygame.font.SysFont('malgungothic', 50)
@@ -568,7 +568,17 @@ class Player():
     def draw_message(self, msg:str, color:tuple, x:int, y:int):
         msg = f'{msg}'
         img = self.mfont20.render(msg, True, color)
-        self.screen.blit(img, (x, y))
+        
+        if self.parent.on_alpha:            
+            temp_surface = pygame.Surface(img.get_size())
+            # img = pygame.transform.scale(img, (img.get_width()-6, img.get_height()-6))
+            temp_surface.fill((192, 192, 192))
+            temp_surface.blit(img, (0, 0))
+            # temp_surface.set_alpha(100)
+            self.screen.blit(temp_surface, (x, y))
+        else:
+            self.screen.blit(img, (x, y))
+        
     
     def set_msg_score(self, x=10,y=10, color = (0,0,0), text = '점수 : '):
         self.msg_score_x = x
