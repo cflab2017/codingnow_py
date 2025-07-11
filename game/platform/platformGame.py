@@ -26,6 +26,7 @@ from codingnow.game.platform.lava import *
 from codingnow.game.platform.bullet import *
 from codingnow.game.platform.bullet_monster import *
 from codingnow.game.platform.exitdoor import *
+from codingnow.game.platform.teleport import *
 from codingnow.game.platform.weapon import *
 from codingnow.game.platform.hp import *
 
@@ -49,6 +50,7 @@ class PlatformGame():
         self.group_lava = pygame.sprite.Group()
         self.group_monster = pygame.sprite.Group()
         self.group_exitDoor = pygame.sprite.Group()
+        self.group_Teleport = pygame.sprite.Group()
         self.group_weapon = pygame.sprite.Group()
         self.group_bullet = pygame.sprite.Group()
         self.group_bulletMonster = pygame.sprite.Group()
@@ -96,6 +98,7 @@ class PlatformGame():
         self.group_block.empty()
         self.group_lava.empty()
         self.group_exitDoor.empty()
+        self.group_Teleport.empty()
         self.group_weapon.empty()
         self.group_hp.empty()
         try:            
@@ -139,6 +142,12 @@ class PlatformGame():
                         width=values[4]
                         height=values[5]
                         self.group_exitDoor.add(ExitDoor(self.screen,img,x,y,next_level,width,height))
+                    if key == 'teleport':
+                        toX = values[3]
+                        toY = values[4]
+                        width = values[5]
+                        height = values[6]
+                        self.group_Teleport.add(Teleport(self.screen,img,x,y,toX,toY,width,height))
                     if key == 'lava':
                         self.group_lava.add(Lava(self.screen,img,x,y))
                     if key == 'weapon':
@@ -240,7 +249,12 @@ class PlatformGame():
         self.map_data[level]['exit'].append([filename,x,y,next_level,width,height])
         if self.lastExt < level:
             self.lastExt = level
-
+            
+    def add_map_teleport(self,level:int, filename:str, x:int, y:int, toX:int, toY:int, width:int=60, height:int=60):
+        filename = self.get_folder_img(filename)
+        self.check_map_init(level,'teleport')
+        self.map_data[level]['teleport'].append([filename,x,y,toX,toY,width,height])
+            
     def add_bullet(self,filename):
         # print(filename)
         # filename = self.get_folder_img(filename)
@@ -370,6 +384,7 @@ class PlatformGame():
                 self.add_bulletMonster(monster.image, monster)
             
         self.group_exitDoor.update()
+        self.group_Teleport.update()
         self.group_block.update()
         self.group_coin.update()
         self.group_hp.update()
@@ -379,6 +394,7 @@ class PlatformGame():
         self.group_bulletMonster.update()
         
         self.group_exitDoor.draw(self.screen)
+        self.group_Teleport.draw(self.screen)
         self.group_block.draw(self.screen)
         self.group_coin.draw(self.screen)
         self.group_hp.draw(self.screen)

@@ -489,6 +489,13 @@ class Player():
                 self.rect.x,self.rect.y = self.get_position(self.level)      
                 self.rect_pre = self.rect.copy()
                 
+        teleport = pygame.sprite.spritecollide(self, self.parent.group_Teleport, False)
+        if len(teleport):
+            teleport = teleport[0]
+            self.rect.x = teleport.toX
+            self.rect.y = teleport.toY
+            self.rect_pre = self.rect.copy()
+        
         exit_door = pygame.sprite.spritecollide(self, self.parent.group_exitDoor, False)
         if len(exit_door):
             level = exit_door[0].next_level#맵점프
