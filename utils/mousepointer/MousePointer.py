@@ -1,5 +1,18 @@
-import pygame
-import win32api
+
+import os
+try:
+    import pygame
+except:
+    os.system('pip install pygame')
+    import pygame
+
+import os
+try:
+    import win32api
+except:
+    os.system('pip install pywin32')
+    import win32api
+    
 import win32con
 import win32gui
 import ctypes
