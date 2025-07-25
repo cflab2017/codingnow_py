@@ -610,11 +610,12 @@ class Player():
         self.msg_jumpcnt_color = color
         self.msg_jumpcnt_text = text
         
-    def set_msg_gameTime(self, x=10,y=210, color = (0,0,0), text = '시간 : '):
+    def set_msg_gameTime(self, x=10,y=210, color = (0,0,0), text = '시간 : ', end='초'):
         self.msg_gametime_x = x
         self.msg_gametime_y = y
         self.msg_gametime_color = color
         self.msg_gametime_text = text
+        self.msg_gametime_text_end = end
         
     def draw(self):
         if self.is_start:
@@ -652,7 +653,7 @@ class Player():
                             y=self.msg_jumpcnt_y)
             
         if self.msg_gametime_text is not None:
-            self.draw_message(f'{self.msg_gametime_text}{self.gametime/100:.2f}초',
+            self.draw_message(f'{self.msg_gametime_text}{self.gametime/100:.2f}{self.msg_gametime_text_end}',
                             self.msg_gametime_color, 
                             x=self.msg_gametime_x,
                             y=self.msg_gametime_y)
