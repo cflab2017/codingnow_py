@@ -1,4 +1,5 @@
 from codingnow.learning.coding.Chapters.chapter_01 import *
+from codingnow.learning.coding.Chapters.chapter_02 import *
         
 class CodingTest:
     chapter = 1
@@ -10,6 +11,9 @@ class CodingTest:
         self.chapter = chapter
         if self.chapter == 1:
             self.instance = Chapter_01()
+            self.instance.start()
+        if self.chapter == 2:
+            self.instance = Chapter_02()
             self.instance.start()
         else:
             print("해당 챕터는 준비중입니다.")
