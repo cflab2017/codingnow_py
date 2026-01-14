@@ -28,6 +28,13 @@ class Chapter_01:
         print("코딩 테스트 - Chapter 1: 변수 사용 및 연산")
         print("설명: 주어진 숫자의 사칙연산 값을 구하세요.")
         print(f"현재 챕터는 총 {self.step_max} 단계입니다.")
+        print()
+        print("사용법:")
+        print(" 1. result = coding.get()  # 생성된 문제값을 순서대로 반환, 반환값이 없으면 'END' 반환")
+        print(" 2. if coding.answer(answer) == False:  # 틀리거나 모든 문제를 통과하면 False 반환")
+        print(" 3. coding.print_options()  # 사용가능한 옵션 정보 출력")
+        print(" 4. value = coding.get_option(cmd)  # 옵션값 반환 (cmd: operation, length)")
+        
         print("=" * self.guide_line_max,end='')
         print("\033[0m",end='')
         print("\n"*1)

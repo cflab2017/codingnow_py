@@ -2,14 +2,13 @@
 # os.system('pip install codingnow --upgrade')
 from codingnow.learning.coding.codingTest import *
 
-problem = CodingTest()
-problem.start(chapter=2)
+coding = CodingTest()
+coding.start(chapter=2)
 
+coding.print_options()
 
-problem.print_options()
-
-oop = problem.get_option('operation')
+oop = coding.get_option('operation')
 print('oop:', oop)
 
-length = problem.get_option('length')
+length = coding.get_option('length')
 print('length:', length)

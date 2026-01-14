@@ -2,15 +2,15 @@
 # os.system('pip install codingnow --upgrade')
 from codingnow.learning.coding.codingTest import *
 
-problem = CodingTest()
-problem.start(chapter=2)
+coding = CodingTest()
+coding.start(chapter=2)
 
 while True:
     values = []
     op = ''
 
     while True:
-        value = problem.get()
+        value = coding.get()
         if value == 'END':
             break
         
@@ -33,7 +33,7 @@ while True:
     elif op == '평균':
         answer = sum(values) / len(values)
 
-    result = problem.answer(answer)
+    result = coding.answer(answer)
     if result:
         continue
     else:

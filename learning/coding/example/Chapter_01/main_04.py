@@ -2,8 +2,8 @@ import os
 os.system('pip install codingnow --upgrade')
 from codingnow.learning.coding.codingTest import *
 
-coding_test = CodingTest()
-coding_test.start(chapter=1)
+coding = CodingTest()
+coding.start(chapter=1)
 
 while True:
     answer = 0
@@ -11,7 +11,7 @@ while True:
     op = ''
     values = []
     while True:
-        value = coding_test.get()
+        value = coding.get()
         
         if value == 'END':
             break
@@ -25,7 +25,7 @@ while True:
     calculate = str(values[0]) + op + str(values[1])
     answer = eval(calculate)
 
-    result = coding_test.answer(answer)
+    result = coding.answer(answer)
     if result:
         continue
     else:
