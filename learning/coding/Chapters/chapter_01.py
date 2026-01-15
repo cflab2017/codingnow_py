@@ -97,6 +97,10 @@ class Chapter_01:
                 print("\033[0m")
                 self.is_return_operation = False
                 return self.current_operation
+            
+            print("\033[33m",end='')
+            print(f"      END",end='')        
+            print("\033[0m")
             return 'END'
         
         value = self.problem_lst[self.problem_idx]
