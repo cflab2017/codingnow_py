@@ -8,29 +8,25 @@ import random
 # White	37	\033[37m
 # 초기화	0	\033[0m (반드시 끝에 넣어줘야 다음 줄에 영향이 없음)
 
-class Chapter_03:
-    chapter = 3
+class Chapter_04:
+    chapter = 4
     step = 1   
     step_min = 1
     step_max = 1
-    title = "간단한 게임 : 숫자 맞추기"
-    number_lower = 1
-    number_upper = 100
+    title = "간단한 게임 : 야구게임"
     correct = 0
     guide_line_max = 50
-    operation = ['up', 'down','정답']
-    current_operation = '없음'
-    is_return_operation = False
     
     answer_limit_count = 10
     answer_count = 0
+    strike = 0
+    ball = 0
     
     
     def __init__(self):
         print("\033[32m=" * self.guide_line_max)
         print(f"코딩 테스트 - Chapter {self.chapter}: {self.title}")
-        print("설명: 입력한 숫자보다 크면 'up', 작으면 'down', 같으면 '정답'이 출력됩니다.")
-        print(f"출력되는 값 : {self.operation}")
+        print("설명: 같은 자리의 수는 스트라이크, 다른 자리의 수는 볼이 출력됩니다.")
         print(f"현재 챕터는 총 {self.step_max} 단계입니다.")
         print()
         print("사용법:")
@@ -56,30 +52,40 @@ class Chapter_03:
         print("\033[34m",end='')
         print(f"[{self.step} 단계] ",end='')
         print("\033[0m")
-        self.problem_idx = 0
-        
-        self.number_upper = (self.step) * 100
-        self.correct = random.randint(self.number_lower, self.number_upper)
 
-        self.answer_limit_count = 10
+        self.strike = 0
+        self.ball = 0
+        self.correct = ''.join(random.sample(['1','2','3','4','5','6','7','8','9'],3))
+
+        self.answer_limit_count = 100
         self.answer_count = 0
         self.is_return_operation = True
         print("\033[34m",end='')
-        print(f"[문제 설명] 주어진 숫자를 맞추세요. 숫자는 {self.number_lower} 부터 {self.number_upper} 사이입니다.")
+        print(f"[문제 설명] 3자리 숫자를 맞춰보세요! (중복 숫자 없음) ",end='')
+        print(f"정답 값: {self.correct}")
         print("=" * self.guide_line_max,end='')
         print("\033[0m")
                 
     def get(self):
-        return self.current_operation
+        return {"strike": self.strike, "ball": self.ball}
     
     def get_operation(self):
-        return self.current_operation
-    
+        return {"strike": self.strike, "ball": self.ball}
+
     def answer(self, answer):
         self.answer_count += 1
         print(f"\n\033[31m[결과 확인] 입력 값: {answer} 시도횟수 : {self.answer_count}\033[0m")
-        # print(f"정답 값: {self.correct}")
         # print()
+        answer = str(answer)
+        self.strike = 0
+        self.ball = 0
+        for i in range(3):
+            if answer[i] == self.correct[i]:
+                self.strike += 1
+            elif answer[i] in self.correct:
+                self.ball += 1
+        print(f"\033[33m스트라이크: {self.strike}, 볼: {self.ball}\033[0m")
+        
         if answer == self.correct:
             print("\033[31m정답!!\033[0m")
             print()
@@ -104,15 +110,7 @@ class Chapter_03:
             print("=" * self.guide_line_max)
             print()
             return False
-        elif answer < self.correct:
-            self.current_operation = 'up'
-            print("\033[33mup\033[0m")
-            print("=" * self.guide_line_max)
-            print()
-            return True
         else:
-            self.current_operation = 'down'
-            print("\033[33mdown\033[0m")
             print("=" * self.guide_line_max)
             print()
             return True
@@ -128,17 +126,11 @@ class Chapter_03:
         print("\033[33m",end='')
         print()
         print("[옵션 정보]")
-        print(f" * operation (현재결과) : {self.current_operation}")
-        print(f" * lower     (하위값): {self.number_lower}")
-        print(f" * upper     (상위값): {self.number_upper}",end='')
+        print(f" * operation (현재결과) : {(self.strike, self.ball)}")
         print("\033[0m")
         
     def get_option(self, cmd):
         if cmd == 'operation':
-            return self.current_operation
-        elif cmd == 'lower':
-            return self.number_lower
-        elif cmd == 'upper':
-            return self.number_upper
+            return (self.strike, self.ball)
         else:
             return None

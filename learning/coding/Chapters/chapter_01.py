@@ -25,7 +25,7 @@ class Chapter_01:
     
     def __init__(self):
         print("\033[32m=" * self.guide_line_max)
-        print("코딩 테스트 - Chapter 1: 변수 사용 및 연산")
+        print(f"코딩 테스트 - Chapter {self.chapter}: {self.title}")
         print("설명: 주어진 숫자의 사칙연산 값을 구하세요.")
         print(f"현재 챕터는 총 {self.step_max} 단계입니다.")
         print()
