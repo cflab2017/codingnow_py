@@ -3,10 +3,12 @@
 from codingnow.learning.coding.codingTest import *
 
 coding = CodingTest()
-coding.start(chapter=3)
+coding.start(chapter=2)
 
-lower = coding.get_option('lower')
-print('lower:', lower)
+coding.print_options()
 
-upper = coding.get_option('upper')
-print('upper:', upper)
+oop = coding.get_option('operation')
+print('oop:', oop)
+
+length = coding.get_option('length')
+print('length:', length)

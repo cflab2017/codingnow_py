@@ -1,40 +1,36 @@
-# import os
-# os.system('pip install codingnow --upgrade')
-from codingnow.learning.coding.codingTest import *
+import codingnow
 
-coding = CodingTest()
-coding.start(chapter=2)
+coding = codingnow.CodingTest()
+coding.start(2)
+
 
 while True:
     values = []
     op = ''
-
+    result = 0
     while True:
         value = coding.get()
         if value == 'END':
             break
-        
-        if value in ['최대', '최소', '짝수개수', '홀수개수', '합계', '평균']:
+        if value in ['추가', '합', '평균', '길이', '짝수합', '홀수합']:
             op = value
             continue
         
-        values.append(value)   
-
-    if op == '최대':
-        answer = max(values)
-    elif op == '최소':
-        answer = min(values)
-    elif op == '짝수개수':
-        answer = sum(1 for v in values if v % 2 == 0)
-    elif op == '홀수개수':
-        answer = sum(1 for v in values if v % 2 == 1)
-    elif op == '합계':
-        answer = sum(values)
+        values.append(value)
+        
+    if op == '추가':
+        result = values
+    elif op == '합':
+        result = sum(values)
     elif op == '평균':
-        answer = sum(values) / len(values)
-
-    result = coding.answer(answer)
-    if result:
-        continue
-    else:
+        result = sum(values) / len(values) if values else 0
+    elif op == '길이':
+        result = len(values)
+    elif op == '짝수합':
+        result = sum(v for v in values if v % 2 == 0)
+    elif op == '홀수합':
+        result = sum(v for v in values if v % 2 != 0)
+        
+    if coding.answer(result) == False:
         break
+

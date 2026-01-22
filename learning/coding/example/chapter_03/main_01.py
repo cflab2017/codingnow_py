@@ -3,27 +3,62 @@
 from codingnow.learning.coding.codingTest import *
 
 coding = CodingTest()
-coding.start(chapter=3)
+coding.start(chapter=2)
 
-lower = coding.get_option('lower')
-print('lower:', lower)
+#최대 값
+a = coding.get()
+b = coding.get()
 
-upper = coding.get_option('upper')
-print('upper:', upper)
+if a > b:
+    c = a
+else:
+    c = b
 
-answer = (upper + lower)//2
+coding.answer(c)
 
-while True:
+#최소 값
+a = coding.get()
+b = coding.get()
+if a < b:
+    c = a
+else:
+    c = b
+
+coding.answer(c)
+
+
+#짝수개수
+a = coding.get()
+b = coding.get()
+
+cnt = 0
+if a % 2 == 0:
+    cnt += 1
+if b % 2 == 0:
+    cnt += 1
+coding.answer(cnt)
+        
     
-    if coding.answer(answer) == False:
-        break
-    
-    result = coding.get()
-    if result == '정답':
-        break
-    elif result == 'down':
-        upper = answer
-        answer = (answer + lower)//2
-    elif result == 'up':
-        lower = answer
-        answer = (upper + answer)//2
+#짝수개수
+a = coding.get()
+b = coding.get()
+
+cnt = 0
+if a % 2 == 1:
+    cnt += 1
+if b % 2 == 1:
+    cnt += 1
+coding.answer(cnt)
+
+#합계
+a = coding.get()
+b = coding.get()
+c = a + b
+coding.answer(c)
+
+#평균
+a = coding.get()
+b = coding.get()
+c = a + b
+c = c / 2
+coding.answer(c)

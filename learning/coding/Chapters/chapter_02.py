@@ -12,21 +12,21 @@ class Chapter_02:
     chapter = 2
     step = 1   
     step_min = 1
-    step_max = 20
-    title = "조건문과 비교연산"
+    step_max = 6
+    title = "리스트 사용법 익히기"
     problem_lst = []
     problem_idx = 0 
     correct = 0
     guide_line_max = 50
-    operation = ['최대', '최소','짝수개수', '홀수개수', '합계','평균']
-    current_operation = '최대'
+    operation = ['추가', '길이', '합', '평균', '짝수합', '홀수합']
+    current_operation = 'append'
     is_return_operation = False
     
     
     def __init__(self):
         print("\033[32m=" * self.guide_line_max)
         print(f"코딩 테스트 - Chapter {self.chapter}: {self.title}")
-        print("설명: 주어진 숫자의 조건문과 비교연산을 사용하세요.")
+        print("설명: 리스트를 생성하고 다양한 연산을 사용하세요.")
         print(f"{self.operation}를 구합니다.")
         print(f"현재 챕터는 총 {self.step_max} 단계입니다.")
         print()
@@ -55,39 +55,64 @@ class Chapter_02:
         print("\033[0m")
         self.problem_idx = 0
         
-        if self.step <= 6:
-            self.problem_lst = [random.randint(10,100) for _ in range(2) ]
-            self.current_operation = self.operation[self.step - 1]
-        elif self.step <= 12:
-            self.problem_lst = [random.randint(10,100) for _ in range(4) ]
-            self.current_operation = self.operation[(self.step - 1) % 6]
-        else:
-            self.problem_lst = [random.randint(10,100) for _ in range(10) ]
-            self.current_operation = random.choice(self.operation)
-            print("\033[31m",end='')
-            print("현재 단계는 랜덤 연산자 단계입니다.",end='')
-            print("\033[0m")
+        self.problem_lst = [random.randint(10,100) for _ in range(random.randint(10,20)) ]
+        self.current_operation = self.operation[self.step - 1]
+            
+        # elif self.step <= 12:
+        #     self.problem_lst = [random.randint(10,100) for _ in range(20) ]
+        #     self.current_operation = self.operation[(self.step - 1) % 6]
+        # else:
+        #     self.problem_lst = [random.randint(10,100) for _ in range(30) ]
+        #     self.current_operation = random.choice(self.operation)
+        #     print("\033[31m",end='')
+        #     print("현재 단계는 랜덤 연산자 단계입니다.",end='')
+        #     print("\033[0m")
         
         self.is_return_operation = True
         print("\033[34m",end='')
-        if self.current_operation == '최대':
-            print("주어진 숫자 중 최대값을 구하세요.")
-            self.correct = max(self.problem_lst)
-        elif self.current_operation == '최소':
-            print("주어진 숫자 중 최소값을 구하세요.")
-            self.correct = min(self.problem_lst)
-        elif self.current_operation == '짝수개수':
-            print("주어진 숫자 중 짝수의 개수를 구하세요.")
-            self.correct = sum(1 for x in self.problem_lst if x % 2 == 0)
-        elif self.current_operation == '홀수개수':
-            print("주어진 숫자 중 홀수의 개수를 구하세요.")
-            self.correct = sum(1 for x in self.problem_lst if x % 2 != 0)
-        elif self.current_operation == '합계':
-            print("주어진 숫자의 합계를 구하세요.")
+        if self.current_operation == '추가':
+            print("주어진 숫자를 리스트에 추가하고 리스트를 반환하세요.")
+            print()
+            print(f" 힌트")
+            print(f" values = []  # 빈 리스트 생성")
+            print(f" values.append(value)  # 리스트에 값 추가")
+            print()
+            self.correct = self.problem_lst
+        elif self.current_operation == '합':
+            print("리스트에 있는 숫자들의 합계를 구하세요.")
+            print()
+            print(f" 힌트")
+            print(f" result = sum(values)  # 리스트의 합구하기")
+            print()
             self.correct = sum(self.problem_lst)
         elif self.current_operation == '평균':
-            print("주어진 숫자의 평균값을 구하세요.")
+            print("리스트에 있는 숫자들의 평균값을 구하세요.")
             self.correct = sum(self.problem_lst) / len(self.problem_lst)
+        elif self.current_operation == '길이':
+            print("리스트에 있는 숫자들의 개수를 구하세요.")
+            print()
+            print(f" 힌트")
+            print(f" result = len(values)  # 리스트의 길이 구하기")
+            print()
+            self.correct = len(self.problem_lst)
+        elif self.current_operation == '짝수합':
+            print("리스트에 있는 숫자들 중 짝수 값들의 합계를 구하세요.")
+            print()
+            print(f" 힌트")
+            print(f" for val in values: # 리스트에서 한개씩 값 꺼내기")
+            print()
+            self.correct = sum(x for x in self.problem_lst if x % 2 == 0)
+        elif self.current_operation == '홀수합':
+            print("리스트에 있는 숫자들 중 홀수 값들의 합계를 구하세요.")
+            print()
+            print(f" 힌트")
+            print(f" for val in values: # 리스트에서 한개씩 값 꺼내기")
+            print()
+            self.correct = sum(x for x in self.problem_lst if x % 2 != 0)
+            
+        # elif self.current_operation == 'del':
+        #     print("리스트에 있는 숫자들 중 짝수 값을 모두 삭제한 리스트를 구하세요.")
+        #     self.correct = [x for x in self.problem_lst if x % 2 != 0]
             
         print(f" * 문제값 : {len(self.problem_lst)}개")
         print(f" * 연산자 : 1개")
@@ -98,20 +123,20 @@ class Chapter_02:
         if self.problem_idx >= len(self.problem_lst):
             if self.is_return_operation:
                 print("\033[33m",end='')
-                print(f" 연산자: {self.current_operation}",end='')
+                print(f"{self.current_operation}",end='')
                 print("\033[0m")
                 self.is_return_operation = False
                 return self.current_operation
             
             print("\033[33m",end='')
-            print(f"      END",end='')        
+            print(f"END",end='')        
             print("\033[0m")
             return 'END'
         
         value = self.problem_lst[self.problem_idx]
         
         print("\033[33m",end='')
-        print(f" 문제값: {value}",end='')        
+        print(f"{value}",end='')        
         print("\033[0m")
         self.problem_idx += 1
         return value
@@ -119,9 +144,10 @@ class Chapter_02:
     def get_operation(self):
         return self.current_operation
     
-    def answer(self, answer):
+    def answer(self, answer:list):
         print(f"\n\033[31m[결과 확인]\n 입력 값: {answer}\n 정답 값: {self.correct}\033[0m")
         print()
+        
         if answer == self.correct:
             print("정답!!")
             print()

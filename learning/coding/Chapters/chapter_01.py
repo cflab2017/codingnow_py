@@ -27,6 +27,7 @@ class Chapter_01:
         print("\033[32m=" * self.guide_line_max)
         print(f"코딩 테스트 - Chapter {self.chapter}: {self.title}")
         print("설명: 주어진 숫자의 사칙연산 값을 구하세요.")
+        print(f"{self.operation}")
         print(f"현재 챕터는 총 {self.step_max} 단계입니다.")
         print()
         print("사용법:")
@@ -93,20 +94,20 @@ class Chapter_01:
         if self.problem_idx >= len(self.problem_lst):
             if self.is_return_operation:
                 print("\033[33m",end='')
-                print(f" 연산자: {self.current_operation}",end='')
+                print(f"{self.current_operation}",end='')
                 print("\033[0m")
                 self.is_return_operation = False
                 return self.current_operation
             
             print("\033[33m",end='')
-            print(f"      END",end='')        
+            print(f"END",end='')        
             print("\033[0m")
             return 'END'
         
         value = self.problem_lst[self.problem_idx]
         
         print("\033[33m",end='')
-        print(f" 문제값: {value}",end='')        
+        print(f"{value}",end='')        
         print("\033[0m")
         self.problem_idx += 1
         return value

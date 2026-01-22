@@ -8,12 +8,12 @@ import random
 # White	37	\033[37m
 # 초기화	0	\033[0m (반드시 끝에 넣어줘야 다음 줄에 영향이 없음)
 
-class Chapter_04:
-    chapter = 4
+class Chapter_baseball_game:
+    chapter = '야구게임'
     step = 1   
     step_min = 1
     step_max = 1
-    title = "간단한 게임 : 야구게임"
+    title = "간단한 게임"
     correct = 0
     guide_line_max = 50
     
@@ -25,7 +25,7 @@ class Chapter_04:
     
     def __init__(self):
         print("\033[32m=" * self.guide_line_max)
-        print(f"코딩 테스트 - Chapter {self.chapter}: {self.title}")
+        print(f"코딩 테스트 - {self.title} : {self.chapter}")
         print("설명: 같은 자리의 수는 스트라이크, 다른 자리의 수는 볼이 출력됩니다.")
         print(f"현재 챕터는 총 {self.step_max} 단계입니다.")
         print()
